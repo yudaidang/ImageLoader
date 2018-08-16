@@ -33,10 +33,7 @@ public class ImageCache {
 
     public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
         if (getBitmapFromMemoryCache(key) == null && bitmap != null) {
-            Log.d("Cache: ", " before: " + mMemoryCache.size() + " " + mMemoryCache.maxSize() + " " + mMemoryCache.evictionCount());
             mMemoryCache.put(key, bitmap);
-            Log.d("Cache: ", " afterr : " + mMemoryCache.size() + " " + mMemoryCache.maxSize() + " " + mMemoryCache.evictionCount());
-
         }
 
     }
@@ -54,8 +51,6 @@ public class ImageCache {
         if (mMemoryCache != null) {
             bitmap = mMemoryCache.get(key);
         }
-
-
         return bitmap;
     }
 

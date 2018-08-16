@@ -29,7 +29,6 @@ public class BitmapPolicy {
     }
 
     public Bitmap read(File inputFile, int width, int height, BitmapFactory.Options options) {
-        /*final BitmapFactory.Options options = new BitmapFactory.Options(); */ //?OK
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(inputFile.getAbsolutePath(), options);
         options.inSampleSize = caculateInSampleSize(options, width, height);
@@ -40,21 +39,14 @@ public class BitmapPolicy {
     }
 
     public Bitmap read(File inputFile) {
-
         WeakReference<Bitmap> bitmap = new WeakReference<>(BitmapFactory.decodeFile(inputFile.getAbsolutePath()));
         return bitmap.get();
     }
 
     private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {
-        final int height = options.outHeight;
-        final int width = options.outWidth;
         int inSampleSize = 1;
-        if (height > heightReq || width > widthReq) {
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-            while ((halfHeight / inSampleSize) >= heightReq && (halfWidth / inSampleSize) >= widthReq) {
-                inSampleSize *= 2;
-            }
+        while (((options.outHeight / 2) / inSampleSize) >= heightReq && ((options.outWidth / 2) / inSampleSize) >= widthReq) {
+            inSampleSize *= 2;
         }
         return inSampleSize;
     }

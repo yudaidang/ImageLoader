@@ -29,6 +29,7 @@ public class DownloadImageRunnable implements Runnable {
     private int width;
     private int height;
     private NetworkCheck networkCheck; //? keep instance
+    final BitmapFactory.Options options = new BitmapFactory.Options();
 
     public DownloadImageRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
         this.mSeqNumb = mSeqNumb;
@@ -38,8 +39,6 @@ public class DownloadImageRunnable implements Runnable {
         this.width = width;
         this.height = height;
         this.networkCheck = networkCheck;
-        Log.d("yudownload", mSeqNumb + " ");
-
     }
 
     public long getSeqNum() {
@@ -52,10 +51,10 @@ public class DownloadImageRunnable implements Runnable {
         Log.d("therad: ", Thread.currentThread().getName() + " ");
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
         if (!networkCheck.isOnline()) {
             return;
         }
-        final BitmapFactory.Options options = new BitmapFactory.Options();
         Bitmap bitmap;
         if (imageCache.getBitmapFromDiskCache(imgUrl) != null) {
             bitmap = imageCache.getBitmapFromDiskCache(imgUrl, width, height, options);
@@ -74,7 +73,7 @@ public class DownloadImageRunnable implements Runnable {
         Bitmap bitmap = null;
         InputStream inputStream = null;
         HttpURLConnection connection = null;
-        byte[] bytes = null;
+        byte[] bytes;
         try {
             URL url = new URL(imgUrl);
             //connection
@@ -91,7 +90,6 @@ public class DownloadImageRunnable implements Runnable {
             new DiskCacheAsyntask(imgUrl).execute(bytes);
 
             //*****
-            final BitmapFactory.Options options = new BitmapFactory.Options();  //?
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
             options.inSampleSize = caculateInSampleSize(options, width, height);
@@ -105,26 +103,19 @@ public class DownloadImageRunnable implements Runnable {
         } finally {
             try {
                 inputStream.close();
+                connection.disconnect();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            connection.disconnect();   //?
-
         }
 
         return bitmap;
     }
 
     private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {
-        final int height = options.outHeight;
-        final int width = options.outWidth;
         int inSampleSize = 1;
-        if (height > heightReq || width > widthReq) {   //?
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-            while ((halfHeight / inSampleSize) >= heightReq && (halfWidth / inSampleSize) >= widthReq) {
-                inSampleSize *= 2;
-            }
+        while(((options.outHeight/2) / inSampleSize) >= heightReq && ((options.outWidth/2) / inSampleSize) >= widthReq){
+            inSampleSize *= 2;
         }
         return inSampleSize;
     }

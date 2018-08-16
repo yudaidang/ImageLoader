@@ -5,11 +5,11 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 import com.example.cpu11268.imageloader.R;
 import com.example.cpu11268.imageloader.RecyclerView.view_item.NewFeedItem;
@@ -46,7 +46,7 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> implements Handle
         mContext = context.getApplicationContext();
         mId = itemView.findViewById(R.id.idItem);
         mainUiHandler = new Handler(this);
-        if(imageWorker == null) {
+        if (imageWorker == null) {
             imageWorker = new ImageWorker(mAvatar, mContext);
         }
     }
@@ -69,6 +69,7 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> implements Handle
 //            mTime.setText(item.getmNewFeed().getmPublish());
 //            mMessage.setText(item.getmNewFeed().getmMessage());
 //            mName.setText(item.getmNewFeed().getmName());
+            Log.d("yuhhh", item.getmNewFeed().getmUrlImage() + " ");
             imageWorker.loadImage(item.getmNewFeed().getmUrlImage());
 /*            Glide.with(mContext)
                     .load(item.getmNewFeed().getmUrlImage())

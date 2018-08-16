@@ -8,7 +8,7 @@ public class NetworkCheck {
     private Context context; //? keep instance?
 
     private NetworkCheck(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
     }
 
     public static NetworkCheck getInstance(Context context){

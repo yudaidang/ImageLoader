@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
@@ -21,9 +20,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ImageWorker<T extends ImageView> implements Handler.Callback {
     private static Executor executor; //?
     private static ImageCache imageCache = null;
-    private WeakReference<Context> context;
+    private static int seqNumber; //? DownloadImageRunnable.seqNum?: OK
     private final Handler mHandler;
-    private int seqNumber; //? DownloadImageRunnable.seqNum?: OK
+    private WeakReference<Context> context;
     private AtomicInteger seq = new AtomicInteger(0);
     private WeakReference<T> view;
     private NetworkCheck networkCheck; //? keep instance OK
@@ -68,11 +67,10 @@ public class ImageWorker<T extends ImageView> implements Handler.Callback {
 
     }
 
-
     public void loadImage(String mUrl) {
-        if(seq.getAndIncrement() >= Integer.MAX_VALUE){
+        if (seq.getAndIncrement() >= Integer.MAX_VALUE) {
             seqNumber = 0;
-        }else {
+        } else {
             seqNumber = seq.getAndIncrement();
         }
         //? overflow
