@@ -42,7 +42,7 @@ public class BitmapPolicy {
     }
 
     public Bitmap read(File inputFile, int width, int height) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();  //?
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(inputFile.getAbsolutePath(), options);
         options.inSampleSize = caculateInSampleSize(options, width, height);

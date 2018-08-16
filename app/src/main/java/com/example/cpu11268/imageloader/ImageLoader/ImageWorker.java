@@ -24,28 +24,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImageWorker implements Handler.Callback {
     private LruCache<String, Bitmap> mMemoryCache;
-    private Executor executor = null;
+    private Executor executor = null; //?
     private ImageCache imageCache = null;
     private WeakReference<Context> context;
     private Handler mHandler;
-    private int seqNumber;
+    private int seqNumber; //? DownloadImageRunnable.seqNum?
     private AtomicInteger seq = new AtomicInteger(0);
     private WeakReference<ImageView> view;
-    private NetworkCheck networkCheck;
+    private NetworkCheck networkCheck; //? keep instance
 
 
-    public ImageWorker(ImageView view, Context context) {
+    public ImageWorker(ImageView view /* //? generic */, Context context) {
         this.view = new WeakReference<>(view);
-        mHandler = new Handler(this);
+        mHandler = new Handler(this); //? which looper?
         this.context = new WeakReference<>(context);
-        networkCheck = new NetworkCheck(new WeakReference<>(context).get());
+        networkCheck = new NetworkCheck(new WeakReference<>(context).get() /* //? wtf? */);
 
         if (imageCache == null) {
             imageCache = ImageCache.getInstance(context);
         }
 
         if (executor == null) {
-            WeakReference<PriorityBlockingQueue> priorityBlockingQueue = new WeakReference<PriorityBlockingQueue>(new PriorityBlockingQueue<Runnable>(1
+            WeakReference<PriorityBlockingQueue> priorityBlockingQueue /* //? WeakReference? */ = new WeakReference<PriorityBlockingQueue>(new PriorityBlockingQueue<Runnable>(1
                     , new Comparator<Runnable>() {
                 @Override
                 public int compare(Runnable o1, Runnable o2) {
@@ -62,13 +62,13 @@ public class ImageWorker implements Handler.Callback {
                     return result;
                 }
             }));
-            executor = new ThreadPoolExecutor(
+            executor = new ThreadPoolExecutor(  //?
                     2,
                     3,
                     60L,
                     TimeUnit.SECONDS,
 
-                    priorityBlockingQueue.get()
+                    priorityBlockingQueue.get() /* //? WeakReference? */
             );
         }
 
@@ -76,9 +76,9 @@ public class ImageWorker implements Handler.Callback {
 
 
     public void loadImage(String mUrl) {
-        seqNumber = seq.getAndIncrement();
+        seqNumber = seq.getAndIncrement(); //? overflow
         if (mUrl == null) {
-            view.get().setImageBitmap(null);
+            view.get().setImageBitmap(null); //? generic
             return;
         }
 
@@ -89,12 +89,12 @@ public class ImageWorker implements Handler.Callback {
         Bitmap bitmap = imageCache.getBitmapFromMemoryCache(mUrl);
         if (bitmap == null) {
             DownloadImageRunnable downloadImageRunnable = new DownloadImageRunnable(mUrl, mHandler, seqNumber, imageCache, widthView, heightView, networkCheck);
-            if (!networkCheck.isOnline()) {
-                return;
+            if (!networkCheck.isOnline()) { //? ^ v
+                return; //? fall back?
             }
-            executor.execute(downloadImageRunnable);
+            executor.execute(downloadImageRunnable); //is running ?
         } else {
-            view.get().setImageBitmap(bitmap);
+            view.get().setImageBitmap(bitmap); //? generic
         }
     }
 

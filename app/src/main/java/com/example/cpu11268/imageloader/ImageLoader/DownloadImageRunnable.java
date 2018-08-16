@@ -24,13 +24,13 @@ public class DownloadImageRunnable implements Runnable {
 
     public static final AtomicLong seq = new AtomicLong(0);
     private final int mId;
-    private final long seqNum;
+    private final long seqNum; //? ImageWorker.seqNum?
     private final ImageCache imageCache;
     private String imgUrl;
     private Handler mHandler;
     private int width;
     private int height;
-    private NetworkCheck networkCheck;
+    private NetworkCheck networkCheck; //? keep instance
     public DownloadImageRunnable(String imgUrl, Handler mHandler, int mId, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
         this.mId = mId;
         this.imgUrl = imgUrl;
@@ -67,7 +67,7 @@ public class DownloadImageRunnable implements Runnable {
         message.sendToTarget();
     }
 
-    protected class DiskCacheAsyntask extends AsyncTask<byte[], Void, Void>{
+    protected class DiskCacheAsyntask extends AsyncTask<byte[], Void, Void>{ //? AsyncTask ?
         private String imgUrlEx;
 
         public DiskCacheAsyntask(String imgUrl) {
@@ -103,7 +103,7 @@ public class DownloadImageRunnable implements Runnable {
             new DiskCacheAsyntask(imgUrl).execute(bytes);
 
             //*****
-            BitmapFactory.Options options = new BitmapFactory.Options();
+            BitmapFactory.Options options = new BitmapFactory.Options();  //?
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
             options.inSampleSize = caculateInSampleSize(options, width, height);
@@ -120,7 +120,7 @@ public class DownloadImageRunnable implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            connection.disconnect();
+            connection.disconnect();   //?
 
         }
 
@@ -131,7 +131,7 @@ public class DownloadImageRunnable implements Runnable {
         final int height = options.outHeight;
         final int width = options.outWidth;
         int inSampleSize = 1;
-        if (height > heightReq || width > widthReq) {
+        if (height > heightReq || width > widthReq) {   //?
             final int halfHeight = height / 2;
             final int halfWidth = width / 2;
             while ((halfHeight / inSampleSize) >= heightReq && (halfWidth / inSampleSize) >= widthReq) {

@@ -5,7 +5,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 public class NetworkCheck {
-    private Context context;
+    private Context context; //? keep instance?
 
     public NetworkCheck(Context context) {
         this.context = context;
