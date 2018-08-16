@@ -10,18 +10,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 public class BitmapPolicy {
-    private Bitmap.CompressFormat mCompressFormat;
-    private int mQuality;
-
-    public BitmapPolicy(Bitmap.CompressFormat mCompressFormat, int mQuality) {
-        this.mCompressFormat = mCompressFormat;
-        this.mQuality = mQuality;
-    }
-
-    public BitmapPolicy() {
-        mCompressFormat = Bitmap.CompressFormat.JPEG;
-        mQuality = 70;
-    }
 
     public boolean write(File outputFile, byte[] value) throws IOException {
         boolean success;
@@ -30,7 +18,6 @@ public class BitmapPolicy {
             out = new FileOutputStream(outputFile);
             BufferedOutputStream buf = new BufferedOutputStream(out);
             buf.write(value);
-//            value.compress(mCompressFormat, mQuality, buf);
             success = true;
         } finally {
             if (out != null) {
@@ -41,8 +28,8 @@ public class BitmapPolicy {
         return success;
     }
 
-    public Bitmap read(File inputFile, int width, int height) {
-        BitmapFactory.Options options = new BitmapFactory.Options();  //?
+    public Bitmap read(File inputFile, int width, int height, BitmapFactory.Options options) {
+        /*final BitmapFactory.Options options = new BitmapFactory.Options(); */ //?OK
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(inputFile.getAbsolutePath(), options);
         options.inSampleSize = caculateInSampleSize(options, width, height);

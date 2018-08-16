@@ -12,10 +12,8 @@ import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
 
 import org.apache.commons.io.IOUtils;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicLong;
@@ -23,39 +21,44 @@ import java.util.concurrent.atomic.AtomicLong;
 public class DownloadImageRunnable implements Runnable {
 
     public static final AtomicLong seq = new AtomicLong(0);
-    private final int mId;
-    private final long seqNum; //? ImageWorker.seqNum?
+    private final int mSeqNumb;
+    //    private final long seqNum; //? ImageWorker.seqNum?
     private final ImageCache imageCache;
     private String imgUrl;
     private Handler mHandler;
     private int width;
     private int height;
     private NetworkCheck networkCheck; //? keep instance
-    public DownloadImageRunnable(String imgUrl, Handler mHandler, int mId, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
-        this.mId = mId;
+
+    public DownloadImageRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
+        this.mSeqNumb = mSeqNumb;
         this.imgUrl = imgUrl;
         this.mHandler = mHandler;
-        seqNum = seq.getAndIncrement();
         this.imageCache = imageCache;
         this.width = width;
         this.height = height;
         this.networkCheck = networkCheck;
+        Log.d("yudownload", mSeqNumb + " ");
+
     }
 
     public long getSeqNum() {
-        return seqNum;
+        return mSeqNumb;
     }
 
 
     @Override
     public void run() {
+        Log.d("therad: ", Thread.currentThread().getName() + " ");
+
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         if (!networkCheck.isOnline()) {
             return;
         }
+        final BitmapFactory.Options options = new BitmapFactory.Options();
         Bitmap bitmap;
         if (imageCache.getBitmapFromDiskCache(imgUrl) != null) {
-            bitmap = imageCache.getBitmapFromDiskCache(imgUrl, width, height);
+            bitmap = imageCache.getBitmapFromDiskCache(imgUrl, width, height, options);
             imageCache.addBitmapToMemoryCache(imgUrl, bitmap);
 
         } else {
@@ -63,23 +66,8 @@ public class DownloadImageRunnable implements Runnable {
             imageCache.addBitmapToMemoryCache(imgUrl, bitmap);
         }
 
-        Message message = mHandler.obtainMessage(mId, bitmap);
+        Message message = mHandler.obtainMessage(mSeqNumb, bitmap);
         message.sendToTarget();
-    }
-
-    protected class DiskCacheAsyntask extends AsyncTask<byte[], Void, Void>{ //? AsyncTask ?
-        private String imgUrlEx;
-
-        public DiskCacheAsyntask(String imgUrl) {
-            this.imgUrlEx = imgUrl;
-        }
-
-        @Override
-        protected Void doInBackground(byte[]... bytes) {
-            imageCache.addBitmapToDiskCache(imgUrlEx, bytes[0], width, height);
-            return null;
-        }
-
     }
 
     private Bitmap downloadImage(String imgUrl) {
@@ -103,7 +91,7 @@ public class DownloadImageRunnable implements Runnable {
             new DiskCacheAsyntask(imgUrl).execute(bytes);
 
             //*****
-            BitmapFactory.Options options = new BitmapFactory.Options();  //?
+            final BitmapFactory.Options options = new BitmapFactory.Options();  //?
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
             options.inSampleSize = caculateInSampleSize(options, width, height);
@@ -139,5 +127,20 @@ public class DownloadImageRunnable implements Runnable {
             }
         }
         return inSampleSize;
+    }
+
+    protected class DiskCacheAsyntask extends AsyncTask<byte[], Void, Void> { //? AsyncTask ?
+        private String imgUrlEx;
+
+        public DiskCacheAsyntask(String imgUrl) {
+            this.imgUrlEx = imgUrl;
+        }
+
+        @Override
+        protected Void doInBackground(byte[]... bytes) {
+            imageCache.addBitmapToDiskCache(imgUrlEx, bytes[0]);
+            return null;
+        }
+
     }
 }

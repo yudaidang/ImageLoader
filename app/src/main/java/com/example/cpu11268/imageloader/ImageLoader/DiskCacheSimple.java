@@ -2,6 +2,7 @@ package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.BitmapPolicy;
@@ -19,25 +20,16 @@ import java.util.List;
 import java.util.Map;
 
 public class DiskCacheSimple {
+    private static final int DEFAULT_MAX_SIZE = 1024 * 1024 * 30;
+    private final LinkedHashMap mFilesInCache;
     private BitmapPolicy mBitmapPolicy;
-    private final LinkedHashMap mFilesInCache ;
     private long mMaxSize;
     private long mCurrentSize;
-    private static final int DEFAULT_MAX_SIZE = 1024*1024*30;
     private File diskCacheDir;
 
-    private File getDiskCacheDir(Context context, String uniqueName) {
-        WeakReference<Context> mContext = new WeakReference<>(context);
-        final String cachePath =
-                Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ?
-                        mContext.get().getExternalCacheDir().getPath() :
-                        context.getCacheDir().getPath();
-        return new File(cachePath + File.separator + uniqueName);
-    }
-
-    private DiskCacheSimple(Context context){
+    private DiskCacheSimple(Context context) {
         mBitmapPolicy = new BitmapPolicy();
-        diskCacheDir = getDiskCacheDir(context, "YuIMAGE");
+        diskCacheDir = getDiskCacheDir(context, "IMAGE");
         mMaxSize = DEFAULT_MAX_SIZE;
         mCurrentSize = 0;
         diskCacheDir.mkdirs();
@@ -70,11 +62,19 @@ public class DiskCacheSimple {
         }
     }
 
-    public static DiskCacheSimple getInstance(Context context){
+    public static DiskCacheSimple getInstance(Context context) {
         DiskCacheSimple diskCacheSimple = new DiskCacheSimple(context);
         return diskCacheSimple;
     }
 
+    private File getDiskCacheDir(Context context, String uniqueName) {
+        WeakReference<Context> mContext = new WeakReference<>(context);
+        final String cachePath =
+                Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ?
+                        mContext.get().getExternalCacheDir().getPath() :
+                        context.getCacheDir().getPath();
+        return new File(cachePath + File.separator + uniqueName);
+    }
 
     private boolean checkSizeCache(int newSizeItem) {
         if (newSizeItem > mMaxSize) {
@@ -106,12 +106,12 @@ public class DiskCacheSimple {
         return null;
     }
 
-    public Bitmap get(String key, int width, int height) {
+    public Bitmap get(String key, int width, int height, BitmapFactory.Options options) {
         int hash = key.hashCode();
         Entry cachedData = (Entry) mFilesInCache.get(hash);
 
         if (cachedData != null) {
-            Bitmap bitmap = mBitmapPolicy.read(cachedData.file, width, height);
+            Bitmap bitmap = mBitmapPolicy.read(cachedData.file, width, height, options);
             return bitmap;
         }
         return null;
@@ -137,7 +137,6 @@ public class DiskCacheSimple {
 
         File outputFile = new File(diskCacheDir, Integer.toString(hash));
 
-        boolean success = true;
         try {
             mBitmapPolicy.write(new File(diskCacheDir, Integer.toString(hash)), value);
         } catch (IOException ex) {

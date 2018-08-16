@@ -3,49 +3,43 @@ package com.example.cpu11268.imageloader.ImageLoader;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.util.LruCache;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
 
-import java.io.File;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Comparator;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ImageWorker implements Handler.Callback {
-    private LruCache<String, Bitmap> mMemoryCache;
-    private Executor executor = null; //?
-    private ImageCache imageCache = null;
+public class ImageWorker<T extends ImageView> implements Handler.Callback {
+    private static Executor executor; //?
+    private static ImageCache imageCache = null;
     private WeakReference<Context> context;
-    private Handler mHandler;
-    private int seqNumber; //? DownloadImageRunnable.seqNum?
+    private final Handler mHandler;
+    private int seqNumber; //? DownloadImageRunnable.seqNum?: OK
     private AtomicInteger seq = new AtomicInteger(0);
-    private WeakReference<ImageView> view;
-    private NetworkCheck networkCheck; //? keep instance
+    private WeakReference<T> view;
+    private NetworkCheck networkCheck; //? keep instance OK
 
-
-    public ImageWorker(ImageView view /* //? generic */, Context context) {
+    public ImageWorker(T view, Context context) {/* //? generic : OK*/
         this.view = new WeakReference<>(view);
-        mHandler = new Handler(this); //? which looper?
+        mHandler = new Handler(this); //? which looper?: OK
         this.context = new WeakReference<>(context);
-        networkCheck = new NetworkCheck(new WeakReference<>(context).get() /* //? wtf? */);
+        networkCheck = NetworkCheck.getInstance(context);/*new NetworkCheck(context *//* //? wtf?: OK *//*);*/
 
         if (imageCache == null) {
             imageCache = ImageCache.getInstance(context);
         }
 
         if (executor == null) {
-            WeakReference<PriorityBlockingQueue> priorityBlockingQueue /* //? WeakReference? */ = new WeakReference<PriorityBlockingQueue>(new PriorityBlockingQueue<Runnable>(1
+            PriorityBlockingQueue priorityBlockingQueue /* //? WeakReference?:OK */ = new PriorityBlockingQueue<Runnable>(1
                     , new Comparator<Runnable>() {
                 @Override
                 public int compare(Runnable o1, Runnable o2) {
@@ -61,14 +55,14 @@ public class ImageWorker implements Handler.Callback {
                     }
                     return result;
                 }
-            }));
+            });
             executor = new ThreadPoolExecutor(  //?
                     2,
                     3,
                     60L,
                     TimeUnit.SECONDS,
 
-                    priorityBlockingQueue.get() /* //? WeakReference? */
+                    priorityBlockingQueue /* //? WeakReference?:OK */
             );
         }
 
@@ -76,23 +70,28 @@ public class ImageWorker implements Handler.Callback {
 
 
     public void loadImage(String mUrl) {
-        seqNumber = seq.getAndIncrement(); //? overflow
+        if(seq.getAndIncrement() >= Integer.MAX_VALUE){
+            seqNumber = 0;
+        }else {
+            seqNumber = seq.getAndIncrement();
+        }
+        //? overflow
         if (mUrl == null) {
-            view.get().setImageBitmap(null); //? generic
+            view.get().setImageBitmap(null); //? generic: OK
             return;
         }
 
         int widthView = (int) (view.get().getLayoutParams().height / (Resources.getSystem().getDisplayMetrics().density));
         int heightView = (int) (view.get().getLayoutParams().height / (Resources.getSystem().getDisplayMetrics().density));
 
-
         Bitmap bitmap = imageCache.getBitmapFromMemoryCache(mUrl);
         if (bitmap == null) {
             DownloadImageRunnable downloadImageRunnable = new DownloadImageRunnable(mUrl, mHandler, seqNumber, imageCache, widthView, heightView, networkCheck);
             if (!networkCheck.isOnline()) { //? ^ v
-                return; //? fall back?
+                view.get().setImageBitmap(null); //?   back?: OK : generic
+            } else {
+                executor.execute(downloadImageRunnable); //is running ?
             }
-            executor.execute(downloadImageRunnable); //is running ?
         } else {
             view.get().setImageBitmap(bitmap); //? generic
         }
@@ -102,7 +101,9 @@ public class ImageWorker implements Handler.Callback {
     public boolean handleMessage(Message msg) {
         final int threadId = msg.what;
         final Bitmap bitmap = (Bitmap) msg.obj;
+
         if (threadId == seqNumber && bitmap != null) {
+
             view.get().setImageBitmap(bitmap);
         }
         return false;

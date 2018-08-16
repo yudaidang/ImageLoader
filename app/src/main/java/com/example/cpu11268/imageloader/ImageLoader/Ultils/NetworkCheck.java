@@ -7,8 +7,12 @@ import android.net.NetworkInfo;
 public class NetworkCheck {
     private Context context; //? keep instance?
 
-    public NetworkCheck(Context context) {
+    private NetworkCheck(Context context) {
         this.context = context;
+    }
+
+    public static NetworkCheck getInstance(Context context){
+        return new NetworkCheck(context);
     }
 
     public boolean isOnline(){
