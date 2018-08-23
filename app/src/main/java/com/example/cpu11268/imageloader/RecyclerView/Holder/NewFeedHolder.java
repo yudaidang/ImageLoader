@@ -1,6 +1,7 @@
 package com.example.cpu11268.imageloader.RecyclerView.Holder;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -8,6 +9,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 import com.example.cpu11268.imageloader.R;
 import com.example.cpu11268.imageloader.RecyclerView.view_item.NewFeedItem;
@@ -54,14 +58,20 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> implements Handle
 
         mId.setText(id + "");
 
-
         mAvatar.setImageDrawable(null);
         itemView.setTag(item);
         mLastUrl = id + "";
         final String idTemp = id + "";
+        Glide.with(mContext)
+                .load(item.getmNewFeed().getmUrlImage())
+                .into(new SimpleTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
 
+                    }
+                });
         if (item != null) {
-            imageWorker.loadImage(item.getmNewFeed().getmUrlImage());
+            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), idTemp);
         } else {
         }
     }

@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -24,8 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 public class DownloadImageRunnable implements Runnable {
 
-    private static ArrayList<Integer> mUrlDownloading;
-    private static Object mLock = new Object();
     private static Executor mExecutor = new ThreadPoolExecutor(2,
             3, 60L,
             TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -38,7 +35,7 @@ public class DownloadImageRunnable implements Runnable {
     private int height;
     private NetworkCheck networkCheck;//? keep instance: NOT
 
-    public DownloadImageRunnable(ArrayList<Integer> mUrlDownloading, String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
+    public DownloadImageRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
         this.mSeqNumb = mSeqNumb;
         this.imgUrl = imgUrl;
         this.mHandler = mHandler;
@@ -46,7 +43,6 @@ public class DownloadImageRunnable implements Runnable {
         this.width = width;
         this.height = height;
         this.networkCheck = networkCheck;
-        this.mUrlDownloading = mUrlDownloading;
     }
 
     public long getSeqNum() {
@@ -58,18 +54,9 @@ public class DownloadImageRunnable implements Runnable {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         if (!networkCheck.isOnline()) {
             return;
-       }
+        }
 
         Bitmap bitmap;
-//        if (mUrlDownloading.size() > 0 && mUrlDownloading.contains(imgUrl.hashCode())) {
-//            synchronized (mLock) {
-//                try {
-//                    mLock.wait();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
         if (imageCache.getBitmapFromDiskCache(imgUrl) != null) {
             bitmap = imageCache.getBitmapFromDiskCache(imgUrl, width, height, options);
             imageCache.addBitmapToMemoryCache(imgUrl, bitmap);
@@ -83,10 +70,8 @@ public class DownloadImageRunnable implements Runnable {
             imageCache.addBitmapToMemoryCache(imgUrl, bitmap);
         }
         Message message = mHandler.obtainMessage(mSeqNumb, imgUrl.hashCode(), 0, bitmap);
-         message.sendToTarget();
-//        synchronized (mLock) {
-//            mLock.notifyAll();
-//        }
+        message.sendToTarget();
+        Log.d("SENDS ", imgUrl.hashCode() + " " + mSeqNumb);
     }
 
     private Bitmap downloadImage(String imgUrl) {
