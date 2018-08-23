@@ -33,9 +33,11 @@ public class DiskCacheSimple {
         mMaxSize = DEFAULT_MAX_SIZE;
         mCurrentSize = 0;
         diskCacheDir.mkdirs();
+
         File files[] = diskCacheDir.listFiles();
         mFilesInCache = new LinkedHashMap<>(16, 0.75f, true);
         List allFiles = new ArrayList<Entry>();
+
         for (File file : files) {
             if (!file.isDirectory()) {
                 long length = file.length();

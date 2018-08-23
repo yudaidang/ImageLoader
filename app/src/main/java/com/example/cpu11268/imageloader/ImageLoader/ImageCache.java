@@ -11,7 +11,7 @@ public class ImageCache {
     private final Object mDiskCacheLock = new Object();
     private DiskCacheSimple mDiskCacheSimple;
     private int maxMemory = (int) Runtime.getRuntime().maxMemory();
-    private int cacheSize = maxMemory / 8;
+    private int cacheSize = maxMemory / 20;
 
     private ImageCache (Context context){
 

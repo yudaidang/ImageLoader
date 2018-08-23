@@ -2,12 +2,12 @@ package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.AddImageRunnable;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
 
 import org.apache.commons.io.IOUtils;
@@ -16,22 +16,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class DownloadImageRunnable implements Runnable {
 
-    public static final AtomicLong seq = new AtomicLong(0);
+    private static ArrayList<Integer> mUrlDownloading;
+    private static Object mLock = new Object();
+    private static Executor mExecutor = new ThreadPoolExecutor(2,
+            3, 60L,
+            TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    final BitmapFactory.Options options = new BitmapFactory.Options();
     private final int mSeqNumb;
-    //    private final long seqNum; //? ImageWorker.seqNum?
     private final ImageCache imageCache;
     private String imgUrl;
     private Handler mHandler;
     private int width;
     private int height;
-    private NetworkCheck networkCheck; //? keep instance
-    final BitmapFactory.Options options = new BitmapFactory.Options();
+    private NetworkCheck networkCheck;//? keep instance: NOT
 
-    public DownloadImageRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
+    public DownloadImageRunnable(ArrayList<Integer> mUrlDownloading, String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
         this.mSeqNumb = mSeqNumb;
         this.imgUrl = imgUrl;
         this.mHandler = mHandler;
@@ -39,40 +46,54 @@ public class DownloadImageRunnable implements Runnable {
         this.width = width;
         this.height = height;
         this.networkCheck = networkCheck;
+        this.mUrlDownloading = mUrlDownloading;
     }
 
     public long getSeqNum() {
         return mSeqNumb;
     }
 
-
     @Override
     public void run() {
-        Log.d("therad: ", Thread.currentThread().getName() + " ");
-
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
         if (!networkCheck.isOnline()) {
             return;
-        }
+       }
+
         Bitmap bitmap;
+//        if (mUrlDownloading.size() > 0 && mUrlDownloading.contains(imgUrl.hashCode())) {
+//            synchronized (mLock) {
+//                try {
+//                    mLock.wait();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
         if (imageCache.getBitmapFromDiskCache(imgUrl) != null) {
             bitmap = imageCache.getBitmapFromDiskCache(imgUrl, width, height, options);
             imageCache.addBitmapToMemoryCache(imgUrl, bitmap);
-
         } else {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             bitmap = downloadImage(imgUrl);
             imageCache.addBitmapToMemoryCache(imgUrl, bitmap);
         }
-
-        Message message = mHandler.obtainMessage(mSeqNumb, bitmap);
-        message.sendToTarget();
+        Message message = mHandler.obtainMessage(mSeqNumb, imgUrl.hashCode(), 0, bitmap);
+         message.sendToTarget();
+//        synchronized (mLock) {
+//            mLock.notifyAll();
+//        }
     }
 
     private Bitmap downloadImage(String imgUrl) {
         Bitmap bitmap = null;
         InputStream inputStream = null;
         HttpURLConnection connection = null;
+
         byte[] bytes;
         try {
             URL url = new URL(imgUrl);
@@ -87,7 +108,8 @@ public class DownloadImageRunnable implements Runnable {
 
             bytes = IOUtils.toByteArray(inputStream);
 
-            new DiskCacheAsyntask(imgUrl).execute(bytes);
+            AddImageRunnable addImageRunnable = new AddImageRunnable(imageCache, imgUrl, bytes);
+            mExecutor.execute(addImageRunnable);
 
             //*****
             options.inJustDecodeBounds = true;
@@ -114,24 +136,9 @@ public class DownloadImageRunnable implements Runnable {
 
     private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {
         int inSampleSize = 1;
-        while(((options.outHeight/2) / inSampleSize) >= heightReq && ((options.outWidth/2) / inSampleSize) >= widthReq){
+        while (((options.outHeight / 2) / inSampleSize) >= heightReq && ((options.outWidth / 2) / inSampleSize) >= widthReq) {
             inSampleSize *= 2;
         }
         return inSampleSize;
-    }
-
-    protected class DiskCacheAsyntask extends AsyncTask<byte[], Void, Void> { //? AsyncTask ?
-        private String imgUrlEx;
-
-        public DiskCacheAsyntask(String imgUrl) {
-            this.imgUrlEx = imgUrl;
-        }
-
-        @Override
-        protected Void doInBackground(byte[]... bytes) {
-            imageCache.addBitmapToDiskCache(imgUrlEx, bytes[0]);
-            return null;
-        }
-
     }
 }

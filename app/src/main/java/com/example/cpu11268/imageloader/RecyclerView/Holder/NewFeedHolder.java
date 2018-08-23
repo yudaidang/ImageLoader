@@ -1,11 +1,9 @@
 package com.example.cpu11268.imageloader.RecyclerView.Holder;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -39,9 +37,6 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> implements Handle
     public NewFeedHolder(View itemView, Context context) {
         super(itemView);
         temp++;
-//        mName = itemView.findViewById(R.id.nameTest);
-//        mTime = itemView.findViewById(R.id.timeTest);
-//        mMessage = itemView.findViewById(R.id.txtMessage);
         mAvatar = itemView.findViewById(R.id.imageAvatar);
         mContext = context.getApplicationContext();
         mId = itemView.findViewById(R.id.idItem);
@@ -66,29 +61,15 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> implements Handle
         final String idTemp = id + "";
 
         if (item != null) {
-//            mTime.setText(item.getmNewFeed().getmPublish());
-//            mMessage.setText(item.getmNewFeed().getmMessage());
-//            mName.setText(item.getmNewFeed().getmName());
-            Log.d("yuhhh", item.getmNewFeed().getmUrlImage() + " ");
             imageWorker.loadImage(item.getmNewFeed().getmUrlImage());
-/*            Glide.with(mContext)
-                    .load(item.getmNewFeed().getmUrlImage())
-                    .into(mAvatar);*/
         } else {
-//            mName.setText("");
-//            mTime.setText("");
-//            mMessage.setText("");
         }
     }
 
 
     @Override
     public boolean handleMessage(Message msg) {
-        final int threadId = msg.what;
-        final Bitmap bitmap = (Bitmap) msg.obj;
-        if (threadId == Integer.parseInt(mLastUrl)) {
-            mAvatar.setImageBitmap(bitmap);
-        }
         return true;
     }
+
 }
