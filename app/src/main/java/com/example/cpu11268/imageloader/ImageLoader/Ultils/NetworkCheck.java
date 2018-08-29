@@ -4,11 +4,13 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import java.lang.ref.WeakReference;
+
 public class NetworkCheck {
-    private Context context; //? keep instance?
+    private WeakReference<Context> context; //? keep instance?
 
     private NetworkCheck(Context context) {
-        this.context = context.getApplicationContext();
+        this.context = new WeakReference<>(context);
     }
 
     public static NetworkCheck getInstance(Context context){
@@ -16,7 +18,7 @@ public class NetworkCheck {
     }
 
     public boolean isOnline(){
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.get().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         return (networkInfo != null && networkInfo.isConnected());
     }

@@ -1,53 +1,40 @@
 package com.example.cpu11268.imageloader.RecyclerView.Holder;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 import com.example.cpu11268.imageloader.R;
 import com.example.cpu11268.imageloader.RecyclerView.view_item.NewFeedItem;
 
-public class NewFeedHolder extends BaseViewHolder<NewFeedItem> implements Handler.Callback {
-    private static final HandlerThread mHandlerThread;
-    private static final Handler handler;
+public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     private static int temp = 0;
     private static int temp1 = 0;
-
-    static {
-        mHandlerThread = new HandlerThread("HandlerThreadaaaa");
-        mHandlerThread.start();
-        handler = new Handler(mHandlerThread.getLooper());
-    }
 
     public TextView mName;
     public TextView mTime;
     public TextView mMessage;
-    public ImageView mAvatar;
+    public Button mAvatar;
     public TextView mId;
     String mLastUrl;
     Handler mainUiHandler;
     private Context mContext;
-    private ImageWorker imageWorker = null;
+    private ImageWorker imageWorker;
 
-    public NewFeedHolder(View itemView, Context context) {
+
+    public NewFeedHolder(View itemView, Context context, ImageWorker imageWorker) {
         super(itemView);
+        this.imageWorker = imageWorker;
         temp++;
         mAvatar = itemView.findViewById(R.id.imageAvatar);
         mContext = context.getApplicationContext();
         mId = itemView.findViewById(R.id.idItem);
-        mainUiHandler = new Handler(this);
-        if (imageWorker == null) {
-            imageWorker = new ImageWorker(mAvatar, mContext);
-        }
+
     }
 
     @Override
@@ -58,28 +45,24 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> implements Handle
 
         mId.setText(id + "");
 
-        mAvatar.setImageDrawable(null);
+        mAvatar.setBackground(null);
         itemView.setTag(item);
         mLastUrl = id + "";
         final String idTemp = id + "";
-        Glide.with(mContext)
-                .load(item.getmNewFeed().getmUrlImage())
-                .into(new SimpleTarget<Drawable>() {
-                    @Override
-                    public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
-
-                    }
-                });
         if (item != null) {
-            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), idTemp);
-        } else {
+            ImageWorker.MyDownloadCallback img = new ImageWorker.MyDownloadCallback() {
+                @Override
+                public void onLoad(Bitmap bitmap) {
+                    BitmapDrawable bm = new BitmapDrawable(mContext.getResources(), bitmap);
+                    mAvatar.setBackground(bm);
+                }
+            };
+
+            imageWorker.setDownloadListener(img);
+            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), idTemp, mAvatar);
+
         }
     }
 
-
-    @Override
-    public boolean handleMessage(Message msg) {
-        return true;
-    }
 
 }

@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 import com.example.cpu11268.imageloader.R;
 import com.example.cpu11268.imageloader.RecyclerView.Holder.BaseViewHolder;
 import com.example.cpu11268.imageloader.RecyclerView.Holder.NewFeedHolder;
@@ -18,10 +19,22 @@ import java.util.List;
 
 public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
+    private ImageWorker imageWorker = null;
+
     private List<BaseViewItem> mItems;
+
+
+
+    @Override
+    public void onViewRecycled(@NonNull BaseViewHolder holder) {
+        super.onViewRecycled(holder);
+        NewFeedHolder holdernf = (NewFeedHolder) holder;
+    }
 
     public BaseViewAdapter(List<BaseViewItem> mItems) {
         this.mItems = mItems;
+
+
         setHasStableIds(true);
     }
 
@@ -51,32 +64,17 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
                 });
                 break;
         }
-        holder = new NewFeedHolder(view, parent.getContext());
+
+
+        if (imageWorker == null) {
+            imageWorker = new ImageWorker(parent.getContext().getApplicationContext());
+        }
+
+        holder = new NewFeedHolder(view, parent.getContext(), imageWorker);
 
         return holder;
     }
 
-    public void addItem(BaseViewItem item, int position) {
-        this.mItems.add(position, item);
-        notifyItemInserted(position);
-    }
-
-    public void changeItem(BaseViewItem item, int position) {
-        this.mItems.remove(position);
-        this.mItems.add(position, item);
-        notifyItemChanged(position);
-    }
-
-    public void moveItem(int startposition, int endposition) {
-        this.mItems.add(endposition, this.mItems.remove(startposition));
-
-        notifyItemMoved(startposition, endposition);
-    }
-
-    public void removeItem(int position) {
-        this.mItems.remove(position);
-        notifyItemRemoved(position);
-    }
 
     @Override
     public void onBindViewHolder(@NonNull final BaseViewHolder holder, int position) {
@@ -88,10 +86,7 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             public void onClick(View v) {
                 final int position = holder.getAdapterPosition();
                 Log.d("Yu: ", position + " ");
-//                BaseViewAdapter.this.notifyItemChanged(position);
                 NewFeed model = new NewFeed("Yudaidang", "2 hours", "ahihi", "http://iforo.3djuegos.com/files_foros/89/894.jpg");
-//                BaseViewAdapter.this.removeItem(/*new NewFeedItem(model), */2);
-//                BaseViewAdapter.this.notifyDataSetChanged();
             }
         });
     }
@@ -115,11 +110,4 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
             return 10;
     }
 
-    public List<BaseViewItem> getItems() {
-        return mItems;
-    }
-
-    public void setItems(List<BaseViewItem> items) {
-        mItems = items;
-    }
 }

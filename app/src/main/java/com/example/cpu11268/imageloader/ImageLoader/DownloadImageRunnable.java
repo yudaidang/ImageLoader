@@ -52,9 +52,7 @@ public class DownloadImageRunnable implements Runnable {
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        if (!networkCheck.isOnline()) {
-            return;
-        }
+
 
         Bitmap bitmap;
         if (imageCache.getBitmapFromDiskCache(imgUrl) != null) {
@@ -69,9 +67,8 @@ public class DownloadImageRunnable implements Runnable {
             bitmap = downloadImage(imgUrl);
             imageCache.addBitmapToMemoryCache(imgUrl, bitmap);
         }
-        Message message = mHandler.obtainMessage(mSeqNumb, imgUrl.hashCode(), 0, bitmap);
+        Message message = mHandler.obtainMessage(imgUrl.hashCode(), bitmap);
         message.sendToTarget();
-        Log.d("SENDS ", imgUrl.hashCode() + " " + mSeqNumb);
     }
 
     private Bitmap downloadImage(String imgUrl) {
