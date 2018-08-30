@@ -108,6 +108,10 @@ public class DiskCacheSimple {
         return null;
     }
 
+    public boolean isBitmapFromDisk(String key){
+        return mFilesInCache.containsKey(key.hashCode());
+    }
+
     public Bitmap get(String key, int width, int height, BitmapFactory.Options options) {
         int hash = key.hashCode();
         Entry cachedData = (Entry) mFilesInCache.get(hash);

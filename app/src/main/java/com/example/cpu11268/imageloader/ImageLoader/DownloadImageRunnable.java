@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.AddImageRunnable;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmapMemCache;
 
 import org.apache.commons.io.IOUtils;
 
@@ -53,20 +54,15 @@ public class DownloadImageRunnable implements Runnable {
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-
         Bitmap bitmap;
-        if (imageCache.getBitmapFromDiskCache(imgUrl) != null) {
-            bitmap = imageCache.getBitmapFromDiskCache(imgUrl, width, height, options);
-            imageCache.addBitmapToMemoryCache(imgUrl, bitmap);
-        } else {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            bitmap = downloadImage(imgUrl);
-            imageCache.addBitmapToMemoryCache(imgUrl, bitmap);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        bitmap = downloadImage(imgUrl);
+        imageCache.addBitmapToMemoryCache(imgUrl, new ValueBitmapMemCache(bitmap, width, height));
+
         Message message = mHandler.obtainMessage(imgUrl.hashCode(), bitmap);
         message.sendToTarget();
     }
@@ -94,11 +90,13 @@ public class DownloadImageRunnable implements Runnable {
             mExecutor.execute(addImageRunnable);
 
             //*****
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-            options.inSampleSize = caculateInSampleSize(options, width, height);
-            options.inMutable = true;
-            options.inJustDecodeBounds = false;
+            if (width != ImageWorker.DEFAULT_SIZE_SAMPLE || height != ImageWorker.DEFAULT_SIZE_SAMPLE) {
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+                options.inSampleSize = caculateInSampleSize(options, width, height);
+                options.inMutable = true;
+                options.inJustDecodeBounds = false;
+            }
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
             //*****
 
@@ -121,6 +119,10 @@ public class DownloadImageRunnable implements Runnable {
         while (((options.outHeight / 2) / inSampleSize) >= heightReq && ((options.outWidth / 2) / inSampleSize) >= widthReq) {
             inSampleSize *= 2;
         }
+
+        Log.d("SAMPLESIZE ", inSampleSize + "");
+
         return inSampleSize;
     }
+
 }

@@ -28,13 +28,12 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public void onViewRecycled(@NonNull BaseViewHolder holder) {
         super.onViewRecycled(holder);
-        NewFeedHolder holdernf = (NewFeedHolder) holder;
+        imageWorker.clearView(((NewFeedHolder) holder).mAvatar);
+        Log.d("YUDAIDANGOVR ", "onViewRecycled " + ((NewFeedHolder) holder).mAvatar);
     }
 
     public BaseViewAdapter(List<BaseViewItem> mItems) {
         this.mItems = mItems;
-
-
         setHasStableIds(true);
     }
 
