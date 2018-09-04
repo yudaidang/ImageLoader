@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class DiskCacheSimple {
     private static final int DEFAULT_MAX_SIZE = 1024 * 1024 * 30;
@@ -65,15 +66,14 @@ public class DiskCacheSimple {
     }
 
     public static DiskCacheSimple getInstance(Context context) {
-        DiskCacheSimple diskCacheSimple = new DiskCacheSimple(context);
-        return diskCacheSimple;
+        return new DiskCacheSimple(context);
     }
 
     private File getDiskCacheDir(Context context, String uniqueName) {
         WeakReference<Context> mContext = new WeakReference<>(context);
         final String cachePath =
                 Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ?
-                        mContext.get().getExternalCacheDir().getPath() :
+                        Objects.requireNonNull(mContext.get().getExternalCacheDir()).getPath() :
                         context.getCacheDir().getPath();
         return new File(cachePath + File.separator + uniqueName);
     }
@@ -97,30 +97,17 @@ public class DiskCacheSimple {
     }
 
     public Bitmap get(String key) {
-        int hash = key.hashCode();
-        Entry cachedData = (Entry) mFilesInCache.get(hash);
-
-        if (cachedData != null) {
-            Bitmap bitmap;
-            bitmap = mBitmapPolicy.read(cachedData.file);
-            return bitmap;
-        }
-        return null;
+        Entry cachedData = (Entry) mFilesInCache.get(key.hashCode());
+        return cachedData != null ? mBitmapPolicy.read(cachedData.file) : null;
     }
 
-    public boolean isBitmapFromDisk(String key){
+    public boolean isBitmapFromDisk(String key) {
         return mFilesInCache.containsKey(key.hashCode());
     }
 
     public Bitmap get(String key, int width, int height, BitmapFactory.Options options) {
-        int hash = key.hashCode();
-        Entry cachedData = (Entry) mFilesInCache.get(hash);
-
-        if (cachedData != null) {
-            Bitmap bitmap = mBitmapPolicy.read(cachedData.file, width, height, options);
-            return bitmap;
-        }
-        return null;
+        Entry cachedData = (Entry) mFilesInCache.get(key.hashCode());
+        return cachedData != null ? mBitmapPolicy.read(cachedData.file, width, height, options) : null;
     }
 
     private void removeFromHash(Entry entry) {
@@ -130,33 +117,31 @@ public class DiskCacheSimple {
     }
 
     public synchronized boolean put(String key, byte[] value) {
-        long size = mBitmapPolicy.size(value);
         int hash = key.hashCode();
         Entry cachedData = (Entry) mFilesInCache.get(hash);
-        if (cachedData != null) {
-            removeFromHash(cachedData);
-        }
+
 
         if (!checkSizeCache(value.length)) {
             return false;
         }
 
-        File outputFile = new File(diskCacheDir, Integer.toString(hash));
+        if (cachedData != null) {
+            removeFromHash(cachedData);
+        }
 
         try {
             mBitmapPolicy.write(new File(diskCacheDir, Integer.toString(hash)), value);
         } catch (IOException ex) {
             return false;
         }
-        cachedData = new Entry(outputFile, size, key.hashCode());
+        cachedData = new Entry(new File(diskCacheDir, Integer.toString(hash)), mBitmapPolicy.size(value), key.hashCode());
         addEntryToHash(cachedData);
         return true;
     }
 
 
     public synchronized void remove(String key) {
-        int hash = key.hashCode();
-        Entry entry = (Entry) mFilesInCache.get(hash);
+        Entry entry = (Entry) mFilesInCache.get(key.hashCode());
         if (entry != null) {
             removeFromHash(entry);
         }

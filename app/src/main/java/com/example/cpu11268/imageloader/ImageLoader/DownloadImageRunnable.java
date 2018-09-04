@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
-import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.AddImageRunnable;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
@@ -15,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.Executor;
@@ -27,16 +27,17 @@ public class DownloadImageRunnable implements Runnable {
     private static Executor mExecutor = new ThreadPoolExecutor(2,
             3, 60L,
             TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-    final BitmapFactory.Options options = new BitmapFactory.Options();
+    private final BitmapFactory.Options options = new BitmapFactory.Options();
     private final int mSeqNumb;
     private final ImageCache imageCache;
     private String imgUrl;
     private Handler mHandler;
     private int width;
     private int height;
-    private NetworkCheck networkCheck;//? keep instance: NOT
+    private WeakReference<NetworkCheck> networkCheck;//? keep instance: NOT
+    private boolean mMaxSize = false;
 
-    public DownloadImageRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
+    public DownloadImageRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, WeakReference<NetworkCheck>  networkCheck) {
         this.mSeqNumb = mSeqNumb;
         this.imgUrl = imgUrl;
         this.mHandler = mHandler;
@@ -60,9 +61,13 @@ public class DownloadImageRunnable implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        bitmap = downloadImage(imgUrl);
-        imageCache.addBitmapToMemoryCache(imgUrl, new ValueBitmapMemCache(bitmap, width, height));
 
+        if(networkCheck.get().isOnline()) {
+            bitmap = downloadImage(imgUrl);
+            imageCache.addBitmapToMemoryCacheTotal(imgUrl, new ValueBitmapMemCache(bitmap, width, height, mMaxSize));
+        }else{
+            bitmap = null;
+        }
         Message message = mHandler.obtainMessage(imgUrl.hashCode(), bitmap);
         message.sendToTarget();
     }
@@ -97,7 +102,12 @@ public class DownloadImageRunnable implements Runnable {
                 options.inMutable = true;
                 options.inJustDecodeBounds = false;
             }
+            int mTempWidth = options.outWidth;
+            int mTempHeight = options.outHeight;
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+            if (mTempWidth == bitmap.getWidth() && mTempHeight == bitmap.getHeight()) {
+                this.mMaxSize = true;
+            }
             //*****
 
         } catch (IOException e) {
@@ -119,9 +129,6 @@ public class DownloadImageRunnable implements Runnable {
         while (((options.outHeight / 2) / inSampleSize) >= heightReq && ((options.outWidth / 2) / inSampleSize) >= widthReq) {
             inSampleSize *= 2;
         }
-
-        Log.d("SAMPLESIZE ", inSampleSize + "");
-
         return inSampleSize;
     }
 

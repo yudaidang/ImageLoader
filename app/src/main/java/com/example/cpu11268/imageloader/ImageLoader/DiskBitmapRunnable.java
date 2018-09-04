@@ -5,11 +5,11 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
-import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmapMemCache;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
 
+import java.lang.ref.WeakReference;
 import java.util.Comparator;
 import java.util.concurrent.Executor;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -22,14 +22,14 @@ public class DiskBitmapRunnable implements Runnable {
     private static Executor executorInternet;
 
 
-    final BitmapFactory.Options options = new BitmapFactory.Options();
+    private final BitmapFactory.Options options = new BitmapFactory.Options();
     private final int mSeqNumb;
     private final ImageCache imageCache;
     private String imgUrl;
     private Handler mHandler;
     private int width;
     private int height;
-    private NetworkCheck networkCheck;//? keep instance: NOT
+    private WeakReference<NetworkCheck> networkCheck;//? keep instance: NOT
 
 
     public DiskBitmapRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
@@ -39,7 +39,7 @@ public class DiskBitmapRunnable implements Runnable {
         this.imageCache = imageCache;
         this.width = width;
         this.height = height;
-        this.networkCheck = networkCheck;
+        this.networkCheck = new WeakReference<>(networkCheck);
 
         if (executorInternet == null) {
             PriorityBlockingQueue priorityBlockingQueue = new PriorityBlockingQueue<Runnable>(1
@@ -79,17 +79,17 @@ public class DiskBitmapRunnable implements Runnable {
 
         Bitmap bitmap;
 
+        boolean mMaxSize = false;
 
         if (imageCache.isBitmapFromDiskCache(imgUrl)) {
             if (width == ImageWorker.DEFAULT_SIZE_SAMPLE || height == ImageWorker.DEFAULT_SIZE_SAMPLE) {
                 bitmap = imageCache.getBitmapFromDiskCache(imgUrl);
+                mMaxSize = true;
             } else {
                 bitmap = imageCache.getBitmapFromDiskCache(imgUrl, width, height, options);
 
             }
-
-            Log.d("bitmapfromdisk ", bitmap.getByteCount() + "");
-            imageCache.addBitmapToMemoryCacheTotal(imgUrl, new ValueBitmapMemCache(bitmap, width, height));
+            imageCache.addBitmapToMemoryCacheTotal(imgUrl, new ValueBitmapMemCache(bitmap, width, height, mMaxSize));
             Message message = mHandler.obtainMessage(imgUrl.hashCode(), bitmap);
             message.sendToTarget();
         } else {

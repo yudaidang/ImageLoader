@@ -5,16 +5,18 @@ import android.widget.ImageView;
 
 import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 
+import java.lang.ref.WeakReference;
+
 public class CallBackImageView implements ImageWorker.MyDownloadCallback {
 
-    private ImageView imageView;
+    private WeakReference<ImageView> imageView;
 
     public CallBackImageView(ImageView imageView) {
-        this.imageView = imageView;
+        this.imageView = new WeakReference<>(imageView);
     }
 
     @Override
     public void onLoad(Bitmap bitmap) {
-        imageView.setImageBitmap(bitmap);
+        imageView.get().setImageBitmap(bitmap);
     }
 }

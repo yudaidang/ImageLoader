@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -31,9 +30,6 @@ public class ImageWorker implements Handler.Callback {//generic
     private static AtomicInteger seq = new AtomicInteger(0);
     private static HashMap<Integer, ArrayList<InfoImageView>> mListView = new HashMap<>();
     private final Handler mHandler;
-    private MyDownloadCallback callback;
-    private int seqNumber;
-    private WeakReference<Context> context;
     private WeakReference<View> view;
     private NetworkCheck networkCheck;
     private String mUrlTemp;
@@ -42,7 +38,6 @@ public class ImageWorker implements Handler.Callback {//generic
 
     public ImageWorker(Context context) {
         mHandler = new Handler(this);
-        this.context = new WeakReference<>(context);
         networkCheck = NetworkCheck.getInstance(context);
         if (imageCache == null) {
             imageCache = ImageCache.getInstance(context);
@@ -79,18 +74,26 @@ public class ImageWorker implements Handler.Callback {//generic
 
     }
 
-    public void onDownloadComplete(Bitmap bitmap, MyDownloadCallback callback) {
-        if (callback != null) {
-            callback.onLoad(bitmap);
-        }
-        callback = null;
+    public void setSizeSmallMemCache(int mMaxSize) {
+        imageCache.setSizeSmallMem(mMaxSize);
     }
 
+    public void setSizeLargeMemCache(int mMaxSize) {
+        imageCache.setSizeLargeMem(mMaxSize);
+    }
+
+    private void onDownloadComplete(Bitmap bitmap, MyDownloadCallback myDownloadCallback) {
+        if (myDownloadCallback != null) {
+            new WeakReference<>(myDownloadCallback).get().onLoad(bitmap);
+        }
+    }
+
+    //handle view bị recycle trong recyclerview
     public void clearView(View mView) {
         if (mListView.containsKey(this.mUrlTemp.hashCode())) {
             ArrayList<InfoImageView> list = mListView.get(this.mUrlTemp.hashCode());
             for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).getView() == mView) {
+                if (list.get(i).getView() == new WeakReference<>(mView)) {
                     list.remove(i);
                     return;
                 }
@@ -98,6 +101,7 @@ public class ImageWorker implements Handler.Callback {//generic
         }
     }
 
+    //handle call back bị recycle trong recyclerview
     public void clearCallback(MyDownloadCallback callback) {
         if (mListView.containsKey(this.mUrlTemp.hashCode())) {
             ArrayList<InfoImageView> list = mListView.get(this.mUrlTemp.hashCode());
@@ -110,17 +114,17 @@ public class ImageWorker implements Handler.Callback {//generic
         }
     }
 
+    //handle cancel khi 1 view đang download image 1 thì download image 2
     public void cancelSameViewLoading(View mView) {
         for (Integer mUrlHashCode : mListView.keySet()) {
             ArrayList<InfoImageView> list = mListView.get(mUrlHashCode);
-            Log.d("YUDAIDNG", mUrlHashCode + " " + list.size());
 
             for (int i = 0; i < list.size(); i++) {
-                View v = list.get(i).getView();
-                if (v == mView && list.size() == 1) {
+                WeakReference<View> v = list.get(i).getView();
+                if (v == new WeakReference<>(mView) && list.size() == 1) {
                     mListView.remove(mUrlHashCode);
                     return;
-                } else if (v == mView) {
+                } else if (v == new WeakReference<>(mView)) {
                     list.remove(i);
                     return;
                 }
@@ -136,11 +140,9 @@ public class ImageWorker implements Handler.Callback {//generic
     }
 
     public void loadImage(final String mUrl, ImageView mView) {
-        this.view = new WeakReference<>((View) mView);
-        this.callback = new CallBackImageView(mView);
         this.mWidth = (int) (view.get().getLayoutParams().width / (Resources.getSystem().getDisplayMetrics().density));
         this.mHeight = (int) (view.get().getLayoutParams().height / (Resources.getSystem().getDisplayMetrics().density));
-        loadImage(mUrl, mView, callback);
+        loadImage(mUrl, mView, new CallBackImageView(mView));
     }
 
     public void setSampleSize(int mWidth, int mHeight) {
@@ -148,54 +150,53 @@ public class ImageWorker implements Handler.Callback {//generic
         this.mHeight = mHeight;
     }
 
+    /*
+        View: width, height
+        MyDownloadCallback: default is ImageView(CallBackImageView)
+        ValueBitmapMemCache:
+     */
+
     public void loadImage(final String mUrl, View mView, MyDownloadCallback callback) {
-        this.callback = callback;
         this.view = new WeakReference<>(mView);
         this.mUrlTemp = mUrl;
-        ValueBitmapMemCache bitmap;
-        int maxWidthHeight = mWidth > mHeight ? mWidth : mHeight;
+        ValueBitmapMemCache valueBitmapMemCache;
 
-
-        if (maxWidthHeight < ImageCache.DEFAULT_MAX_WIDTH_HEIGHT) {
-            bitmap = imageCache.getBitmapFromMemoryCache(mUrl);
-
-        } else {
-            bitmap = imageCache.getBitmapFromMemoryLargeCache(mUrl);
-        }
-        if(bitmap != null){
-            if(bitmap.maxWidthHeight() < maxWidthHeight){
-                bitmap = null;
-            }
-        }
-        if (mUrl == null || !networkCheck.isOnline()) {
+        if (mUrl == null) {
             onDownloadComplete(null, callback);
             return;
         }
 
-        if (bitmap == null) {
-            Log.d("BITMAPCHECK ", " DISK");
+        valueBitmapMemCache = imageCache.getBitmapFromMemoryCache(mUrl);
+        // Nếu valueBitmapMemCache đã lưu trong memcache chưa phải là valueBitmapMemCache có size lớn nhất và width * height lớn hơn default size.
+        // width * height : lấy valueBitmapMemCache gốc.
+        if (valueBitmapMemCache == null || (!valueBitmapMemCache.ismMaxSize() && (mWidth * mHeight > ImageCache.DEFAULT_MAX_SIZE || mWidth * mHeight == -1))) {
+            valueBitmapMemCache = imageCache.getBitmapFromMemoryLargeCache(mUrl);
+        }
+        if (valueBitmapMemCache != null) {
+            // Nếu valueBitmapMemCache đã lưu trong memcache chưa phải là valueBitmapMemCache có size lớn nhất
+            if (!valueBitmapMemCache.ismMaxSize() && (valueBitmapMemCache.getmHeight() * valueBitmapMemCache.getmWidth() < mWidth * mHeight || mHeight * mWidth == -1)) {
+                valueBitmapMemCache = null;
+            }
+        }
 
+        if (valueBitmapMemCache == null) {
             ArrayList<InfoImageView> list;
+            //Kiểm tra url có đang được download ko?
             if (mListView.containsKey(mUrl.hashCode())) {
                 list = mListView.get(mUrl.hashCode());
             } else {
                 list = new ArrayList<>();
-                seqNumber = seq.getAndIncrement() >= Integer.MAX_VALUE ? 0 : seq.getAndIncrement();
 
-                DiskBitmapRunnable diskBitmapRunnable = new DiskBitmapRunnable(mUrl, mHandler, seqNumber, imageCache, mWidth, mHeight, networkCheck);
+                DiskBitmapRunnable diskBitmapRunnable = new DiskBitmapRunnable(mUrl, mHandler, seq.getAndIncrement() >= Integer.MAX_VALUE ? 0 : seq.getAndIncrement(),
+                        imageCache, mWidth, mHeight, networkCheck);
                 executor.execute(diskBitmapRunnable);
 
             }
             list.add(new InfoImageView(callback, mView));
+            //add callback, view vào list đang được download với cùng url.
             mListView.put(mUrl.hashCode(), list);
         } else {
-/*            Log.d("TESTBITMAP1", imageCache.getBitmapFromMemoryCache(mUrl).getByteCount() + " " + mWidth + " " + mHeight);
-            Bitmap bitmapMem = Bitmap.createScaledBitmap(imageCache.getBitmapFromMemoryCache(mUrl), mWidth/2, mHeight/2, true);
-            Log.d("TESTBITMAP2", bitmapMem.getByteCount() + "");
-            Log.d("BITMAP ", bitmap.getByteCount() + " " + mWidth + " " + mHeight);*/
-            Log.d("BITMAPCHECK ", " MEM");
-
-            onDownloadComplete(bitmap.getmBitmap(), callback);
+            onDownloadComplete(valueBitmapMemCache.getmBitmap(), callback);
         }
     }
 
@@ -204,8 +205,10 @@ public class ImageWorker implements Handler.Callback {//generic
         final int msTemp = msg.what;
         final Bitmap bitmap = (Bitmap) msg.obj;
 
+        //kiểm tra list đang được download có chứa url này không?
         if (mListView.containsKey(msTemp)) {
             ArrayList<InfoImageView> list = mListView.get(msTemp);
+            //return bitmap cho các callback với cùng url.
             for (int i = 0; i < list.size(); i++) {
                 onDownloadComplete(bitmap, list.get(i).getCallback());
             }

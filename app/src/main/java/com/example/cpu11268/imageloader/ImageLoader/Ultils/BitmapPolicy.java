@@ -11,21 +11,18 @@ import java.lang.ref.WeakReference;
 
 public class BitmapPolicy {
 
-    public boolean write(File outputFile, byte[] value) throws IOException {
-        boolean success;
+    public void write(File outputFile, byte[] value) throws IOException {
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(outputFile);
             BufferedOutputStream buf = new BufferedOutputStream(out);
             buf.write(value);
-            success = true;
         } finally {
             if (out != null) {
                 out.flush();
                 out.close();
             }
         }
-        return success;
     }
 
     public Bitmap read(File inputFile, int width, int height, BitmapFactory.Options options) {
@@ -34,8 +31,7 @@ public class BitmapPolicy {
         options.inSampleSize = caculateInSampleSize(options, width, height);
         options.inMutable = true;
         options.inJustDecodeBounds = false;
-        Bitmap bitmap = BitmapFactory.decodeFile(inputFile.getAbsolutePath(), options);
-        return bitmap;
+        return BitmapFactory.decodeFile(inputFile.getAbsolutePath(), options);
     }
 
     public Bitmap read(File inputFile) {

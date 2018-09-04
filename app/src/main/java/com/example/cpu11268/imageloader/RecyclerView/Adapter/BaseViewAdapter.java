@@ -11,8 +11,6 @@ import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 import com.example.cpu11268.imageloader.R;
 import com.example.cpu11268.imageloader.RecyclerView.Holder.BaseViewHolder;
 import com.example.cpu11268.imageloader.RecyclerView.Holder.NewFeedHolder;
-import com.example.cpu11268.imageloader.RecyclerView.Ultils.ViewType;
-import com.example.cpu11268.imageloader.RecyclerView.model.NewFeed;
 import com.example.cpu11268.imageloader.RecyclerView.view_item.BaseViewItem;
 
 import java.util.List;
@@ -23,7 +21,15 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     private List<BaseViewItem> mItems;
 
+    private int TYPE_SMALL = 0;
 
+    private int TYPE_LARGE = 1;
+
+
+    public BaseViewAdapter(List<BaseViewItem> mItems) {
+        this.mItems = mItems;
+        setHasStableIds(true);
+    }
 
     @Override
     public void onViewRecycled(@NonNull BaseViewHolder holder) {
@@ -32,46 +38,27 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         Log.d("YUDAIDANGOVR ", "onViewRecycled " + ((NewFeedHolder) holder).mAvatar);
     }
 
-    public BaseViewAdapter(List<BaseViewItem> mItems) {
-        this.mItems = mItems;
-        setHasStableIds(true);
-    }
-
     @NonNull
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d("Yu BaseHolder: ", "onCreateViewHolder ");
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.newfeeditem, parent, false);
-
-        BaseViewHolder holder = null;
-
-        switch (viewType) {
-            case ViewType.NEW_FEEDS:
-
-                view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-                    @Override
-                    public void onViewAttachedToWindow(View v) {
-                        Log.d("Yu ", "Attach");
-                    }
-
-                    @Override
-                    public void onViewDetachedFromWindow(View v) {
-                        Log.d("Yu ", "Detach");
-
-                    }
-                });
-                break;
-        }
-
-
         if (imageWorker == null) {
             imageWorker = new ImageWorker(parent.getContext().getApplicationContext());
         }
+        BaseViewHolder holder;
 
-        holder = new NewFeedHolder(view, parent.getContext(), imageWorker);
+        if (viewType == TYPE_SMALL) {
+            View view = inflater.inflate(R.layout.newfeeditem, parent, false);
+            holder = new NewFeedHolder(view, parent.getContext(), imageWorker);
 
-        return holder;
+            return holder;
+        } else if (viewType == TYPE_LARGE) {
+            View view = inflater.inflate(R.layout.newfeedlargeitem, parent, false);
+            holder = new NewFeedHolder(view, parent.getContext(), imageWorker);
+
+            return holder;
+        }
+        return null;
     }
 
 
@@ -79,7 +66,7 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     public void onBindViewHolder(@NonNull final BaseViewHolder holder, int position) {
         holder.onBind(mItems.get(position), position);
         Log.d("Yu BaseHolder: ", "onBindViewHolder " + position);
-
+/*
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,7 +74,7 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
                 Log.d("Yu: ", position + " ");
                 NewFeed model = new NewFeed("Yudaidang", "2 hours", "ahihi", "http://iforo.3djuegos.com/files_foros/89/894.jpg");
             }
-        });
+        });*/
     }
 
     @Override
@@ -103,10 +90,15 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        if (mItems.get(position) != null)
+        if (position % 2 == 0) {
+            return TYPE_SMALL;
+        } else {
+            return TYPE_LARGE;
+        }
+/*        if (mItems.get(position) != null)
             return mItems.get(position).getViewType();
         else
-            return 10;
+            return 10;*/
     }
 
 }

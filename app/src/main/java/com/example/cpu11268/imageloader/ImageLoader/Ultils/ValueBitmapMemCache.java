@@ -3,14 +3,24 @@ package com.example.cpu11268.imageloader.ImageLoader.Ultils;
 import android.graphics.Bitmap;
 
 public class ValueBitmapMemCache {
-    Bitmap mBitmap;
-    int mWidth;
-    int mHeight;
+    private Bitmap mBitmap;
+    private int mWidth;
+    private int mHeight;
+    private boolean mMaxSize;
 
-    public ValueBitmapMemCache(Bitmap bitmap, int mWidth, int mHeight) {
+    public ValueBitmapMemCache(Bitmap bitmap, int mWidth, int mHeight, boolean mMaxSize) {
         this.mBitmap = bitmap;
         this.mWidth = mWidth;
         this.mHeight = mHeight;
+        this.mMaxSize = mMaxSize;
+    }
+
+    public boolean ismMaxSize() {
+        return mMaxSize;
+    }
+
+    public void setmMaxSize(boolean mMaxSize) {
+        this.mMaxSize = mMaxSize;
     }
 
     public int maxWidthHeight() {

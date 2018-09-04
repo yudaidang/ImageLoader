@@ -19,7 +19,7 @@ public class NetworkCheck {
 
     public boolean isOnline(){
         ConnectivityManager connectivityManager = (ConnectivityManager) context.get().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        NetworkInfo networkInfo = connectivityManager != null ? connectivityManager.getActiveNetworkInfo() : null;
         return (networkInfo != null && networkInfo.isConnected());
     }
 }
