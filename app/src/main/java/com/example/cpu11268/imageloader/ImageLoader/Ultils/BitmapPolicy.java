@@ -7,7 +7,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 
 public class BitmapPolicy {
 
@@ -35,8 +34,8 @@ public class BitmapPolicy {
     }
 
     public Bitmap read(File inputFile) {
-        WeakReference<Bitmap> bitmap = new WeakReference<>(BitmapFactory.decodeFile(inputFile.getAbsolutePath()));
-        return bitmap.get();
+        Bitmap bitmap = BitmapFactory.decodeFile(inputFile.getAbsolutePath());
+        return bitmap;
     }
 
     private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {

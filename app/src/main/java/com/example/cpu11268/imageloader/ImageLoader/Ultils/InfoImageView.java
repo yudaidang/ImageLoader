@@ -4,30 +4,29 @@ import android.view.View;
 
 import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 
-import java.lang.ref.WeakReference;
-
 public class InfoImageView {
-    private WeakReference<ImageWorker.MyDownloadCallback> callback;
-    private WeakReference<View> view;
+    private ImageWorker.MyDownloadCallback callback;
+    private View view;
+
 
     public InfoImageView(ImageWorker.MyDownloadCallback callback, View view) {
-        this.callback = new WeakReference<>(callback);
-        this.view = new WeakReference<>(view);
+        this.callback = callback;
+        this.view = view;
     }
 
     public ImageWorker.MyDownloadCallback getCallback() {
-        return callback.get();
+        return callback;
     }
 
     public void setCallback(ImageWorker.MyDownloadCallback callback) {
-        this.callback = new WeakReference<>(callback);
+        this.callback = callback;
     }
 
-    public WeakReference<View> getView() {
+    public View getView() {
         return view;
     }
 
-    public void setView(WeakReference<View> view) {
+    public void setView(View view) {
         this.view = view;
     }
 }

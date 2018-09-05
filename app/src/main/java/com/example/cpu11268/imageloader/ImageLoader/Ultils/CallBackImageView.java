@@ -1,6 +1,7 @@
 package com.example.cpu11268.imageloader.ImageLoader.Ultils;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;

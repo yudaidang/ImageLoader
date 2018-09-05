@@ -10,7 +10,6 @@ import android.util.Log;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmapMemCache;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
 
-import java.lang.ref.WeakReference;
 import java.util.Comparator;
 import java.util.concurrent.Executor;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -30,7 +29,7 @@ public class DiskBitmapRunnable implements Runnable {
     private Handler mHandler;
     private int width;
     private int height;
-    private WeakReference<NetworkCheck> networkCheck;//? keep instance: NOT
+    private NetworkCheck networkCheck;//? keep instance: NOT
 
 
     public DiskBitmapRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
@@ -40,7 +39,7 @@ public class DiskBitmapRunnable implements Runnable {
         this.imageCache = imageCache;
         this.width = width;
         this.height = height;
-        this.networkCheck = new WeakReference<>(networkCheck);
+        this.networkCheck = networkCheck;
 
         if (executorInternet == null) {
             PriorityBlockingQueue priorityBlockingQueue = new PriorityBlockingQueue<Runnable>(1

@@ -13,7 +13,6 @@ import com.example.cpu11268.imageloader.ImageLoader.Ultils.InfoImageView;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmapMemCache;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,7 +29,6 @@ public class ImageWorker implements Handler.Callback {//generic
     private static AtomicInteger seq = new AtomicInteger(0);
     private static HashMap<Integer, ArrayList<InfoImageView>> mListView = new HashMap<>();
     private final Handler mHandler;
-    private WeakReference<View> view;
     private NetworkCheck networkCheck;
     private String mUrlTemp;
     private int mWidth = DEFAULT_SIZE_SAMPLE;
@@ -84,7 +82,7 @@ public class ImageWorker implements Handler.Callback {//generic
 
     private void onDownloadComplete(Bitmap bitmap, MyDownloadCallback myDownloadCallback) {
         if (myDownloadCallback != null) {
-            new WeakReference<>(myDownloadCallback).get().onLoad(bitmap);
+            myDownloadCallback.onLoad(bitmap);
         }
     }
 
@@ -93,7 +91,7 @@ public class ImageWorker implements Handler.Callback {//generic
         if (mListView.containsKey(this.mUrlTemp.hashCode())) {
             ArrayList<InfoImageView> list = mListView.get(this.mUrlTemp.hashCode());
             for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).getView() == new WeakReference<>(mView)) {
+                if (list.get(i).getView() == mView) {
                     list.remove(i);
                     return;
                 }
@@ -120,11 +118,11 @@ public class ImageWorker implements Handler.Callback {//generic
             ArrayList<InfoImageView> list = mListView.get(mUrlHashCode);
 
             for (int i = 0; i < list.size(); i++) {
-                WeakReference<View> v = list.get(i).getView();
-                if (v == new WeakReference<>(mView) && list.size() == 1) {
+                View v = list.get(i).getView();
+                if (v == mView && list.size() == 1) {
                     mListView.remove(mUrlHashCode);
                     return;
-                } else if (v == new WeakReference<>(mView)) {
+                } else if (v == mView) {
                     list.remove(i);
                     return;
                 }
@@ -155,11 +153,10 @@ public class ImageWorker implements Handler.Callback {//generic
      */
 
     public void loadImage(final String mUrl, View mView, MyDownloadCallback callback) {
-        if(view != null){
-            this.mWidth = (int) (view.get().getLayoutParams().width / (Resources.getSystem().getDisplayMetrics().density));
-            this.mHeight = (int) (view.get().getLayoutParams().height / (Resources.getSystem().getDisplayMetrics().density));
+        if (mView != null) {
+            this.mWidth = (int) (mView.getLayoutParams().width / (Resources.getSystem().getDisplayMetrics().density));
+            this.mHeight = (int) (mView.getLayoutParams().height / (Resources.getSystem().getDisplayMetrics().density));
         }
-        this.view = new WeakReference<>(mView);
         this.mUrlTemp = mUrl;
 
         ValueBitmapMemCache valueBitmapMemCache;

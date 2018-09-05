@@ -15,7 +15,6 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.Executor;
@@ -35,10 +34,10 @@ public class DownloadImageRunnable implements Runnable {
     private Handler mHandler;
     private int width;
     private int height;
-    private WeakReference<NetworkCheck> networkCheck;//? keep instance: NOT
+    private NetworkCheck networkCheck;//? keep instance: NOT
     private boolean mMaxSize = false;
 
-    public DownloadImageRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, WeakReference<NetworkCheck>  networkCheck) {
+    public DownloadImageRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck  networkCheck) {
         this.mSeqNumb = mSeqNumb;
         this.imgUrl = imgUrl;
         this.mHandler = mHandler;
@@ -63,12 +62,13 @@ public class DownloadImageRunnable implements Runnable {
             e.printStackTrace();
         }
 
-        if(networkCheck.get().isOnline()) {
+        if(networkCheck.isOnline()) {
             bitmap = downloadImage(imgUrl);
             imageCache.addBitmapToMemoryCacheTotal(imgUrl, new ValueBitmapMemCache(bitmap, width, height, mMaxSize));
         }else{
             bitmap = null;
         }
+        networkCheck = null;
         Message message = mHandler.obtainMessage(imgUrl.hashCode(), bitmap);
         message.sendToTarget();
     }
