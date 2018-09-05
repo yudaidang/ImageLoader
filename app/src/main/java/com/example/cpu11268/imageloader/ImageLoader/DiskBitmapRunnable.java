@@ -1,76 +1,74 @@
 package com.example.cpu11268.imageloader.ImageLoader;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
+import android.util.Pair;
 
-import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmapMemCache;
-import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkChecker;
 
+import java.lang.ref.WeakReference;
 import java.util.Comparator;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class DiskBitmapRunnable implements Runnable {
+    public static final int IMAGE_LOADED_FROM_DISK_RESULT_CODE = 101;
 
 
     private static Executor executorInternet;
 
 
     private final BitmapFactory.Options options = new BitmapFactory.Options();
-    private final int mSeqNumb;
-    private final ImageCache imageCache;
     private String imgUrl;
     private Handler mHandler;
     private int width;
     private int height;
-    private NetworkCheck networkCheck;//? keep instance: NOT
+    final WeakReference<Context> mContext;
 
-
-    public DiskBitmapRunnable(String imgUrl, Handler mHandler, int mSeqNumb, ImageCache imageCache, int width, int height, NetworkCheck networkCheck) {
-        this.mSeqNumb = mSeqNumb;
+    public DiskBitmapRunnable(Context context, String imgUrl, Handler mHandler, int width, int height) {
         this.imgUrl = imgUrl;
         this.mHandler = mHandler;
-        this.imageCache = imageCache;
         this.width = width;
         this.height = height;
-        this.networkCheck = networkCheck;
+        mContext = new WeakReference<>(context);
 
         if (executorInternet == null) {
-            PriorityBlockingQueue priorityBlockingQueue = new PriorityBlockingQueue<Runnable>(1
-                    , new Comparator<Runnable>() {
+            BlockingQueue queue = new LinkedBlockingDeque() {
+
                 @Override
-                public int compare(Runnable o1, Runnable o2) {
-                    int result = 0;
-
-                    try {
-                        DownloadImageRunnable m1 = (DownloadImageRunnable) o1;
-                        DownloadImageRunnable m2 = (DownloadImageRunnable) o2;
-
-                        result = m1.getSeqNum() > m2.getSeqNum() ? -1 : 1;
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                public boolean add(Object o) {
+                    if (contains(o)) {
+                        remove(o);
                     }
-                    return result;
+                    addFirst(o);
+                    return true;
                 }
-            });
+
+                @Override
+                public void put(Object o) throws InterruptedException {
+                    if (contains(o)) {
+                        remove(o);
+                    }
+                    super.putFirst(o);
+                }
+            };
             executorInternet = new ThreadPoolExecutor(
                     2,
                     3,
                     60L,
                     TimeUnit.SECONDS,
 
-                    priorityBlockingQueue);
+                    queue);
         }
-    }
-
-    public long getSeqNum() {
-        return mSeqNumb;
     }
 
     @Override
@@ -81,23 +79,30 @@ public class DiskBitmapRunnable implements Runnable {
 
         boolean mMaxSize = false;
 
-        if (imageCache.isBitmapFromDiskCache(imgUrl)) {
+        if (ImageCache.getInstance().isBitmapFromDiskCache(imgUrl)) {
             if (width == ImageWorker.DEFAULT_SIZE_SAMPLE || height == ImageWorker.DEFAULT_SIZE_SAMPLE) {
-                bitmap = imageCache.getBitmapFromDiskCache(imgUrl);
+                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imgUrl);
                 mMaxSize = true;
             } else {
-                bitmap = imageCache.getBitmapFromDiskCache(imgUrl, width, height, options);
+                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imgUrl, width, height, options);
                 Log.d("YUHUHUHU ", bitmap.getByteCount() + "");
             }
-            imageCache.addBitmapToMemoryCacheTotal(imgUrl, new ValueBitmapMemCache(bitmap, width, height, mMaxSize));
-            Message message = mHandler.obtainMessage(imgUrl.hashCode(), bitmap);
-            message.sendToTarget();
+            ImageCache.getInstance().addBitmapToMemoryCacheTotal(imgUrl, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
+            handleResult(imgUrl, bitmap);
         } else {
-
-            DownloadImageRunnable downloadImageRunnable = new DownloadImageRunnable(imgUrl, mHandler, mSeqNumb, imageCache, width, height, networkCheck);
-            executorInternet.execute(downloadImageRunnable);
+            if (mContext.get() != null && NetworkChecker.isOnline(mContext.get())) {
+                DownloadImageRunnable downloadImageRunnable = new DownloadImageRunnable(imgUrl, mHandler, width, height);
+                executorInternet.execute(downloadImageRunnable);
+            } else {
+                handleResult(imgUrl, null);
+            }
         }
 
+    }
+
+    private void handleResult (String url, Bitmap bitmap) {
+        Message message = mHandler.obtainMessage(IMAGE_LOADED_FROM_DISK_RESULT_CODE, new Pair<>(url, bitmap));
+        message.sendToTarget();
     }
 
 }

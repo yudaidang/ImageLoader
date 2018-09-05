@@ -10,14 +10,13 @@ import java.lang.ref.WeakReference;
 
 public class CallBackImageView implements ImageWorker.MyDownloadCallback {
 
-    private WeakReference<ImageView> imageView;
 
     public CallBackImageView(ImageView imageView) {
         this.imageView = new WeakReference<>(imageView);
     }
 
     @Override
-    public void onLoad(Bitmap bitmap) {
-        imageView.get().setImageBitmap(bitmap);
+    public void onLoad(Bitmap bitmap, Object which, int resultCode) {
+        onLoad(bitmap, imageView.get(), resultCode);
     }
 }

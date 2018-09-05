@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.cpu11268.imageloader.ImageLoader.ImageLoader;
 import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 import com.example.cpu11268.imageloader.R;
 import com.example.cpu11268.imageloader.RecyclerView.view_item.NewFeedItem;
@@ -24,24 +25,15 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     public TextView mId;
     String mLastUrl;
     private Context mContext;
-    private ImageWorker imageWorker;
 
 
-    public NewFeedHolder(View itemView, Context context, ImageWorker imageWorker) {
+    public NewFeedHolder(View itemView, Context context) {
         super(itemView);
-        this.imageWorker = imageWorker;
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int mMaxSizeMem = (int) (
-                (int) (displayMetrics.widthPixels / context.getResources().getDisplayMetrics().density) *
-                        (displayMetrics.heightPixels / context.getResources().getDisplayMetrics().density)
-                        * 4);// ARGB: 4, RGB: 3, BMP: 16, BMPS: 32
-
-        imageWorker.setSizeSmallMemCache(mMaxSizeMem);
-        imageWorker.setSizeLargeMemCache(mMaxSizeMem);
+        DisplayMetrics displayMetrics = new DisplayMetrics(); //?
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics); //?
         temp++;
         mAvatar = itemView.findViewById(R.id.imageAvatar);
-        mContext = context.getApplicationContext();
+        mContext = context.getApplicationContext(); //?
         mId = itemView.findViewById(R.id.idItem);
 
     }
@@ -61,17 +53,26 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
         if (item != null) {
             ImageWorker.MyDownloadCallback img = new ImageWorker.MyDownloadCallback() {
                 @Override
-                public void onLoad(Bitmap bitmap) {
+                public void onLoad(Bitmap bitmap, Object which, int resultCode) {
                     BitmapDrawable bm = new BitmapDrawable(mContext.getResources(), bitmap);
                     mAvatar.setBackground(bm);
                 }
             };
 //            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), mAvatar);
-            imageWorker.cancelSameViewLoading(mAvatar);
-            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), mAvatar, img);
+            ImageWorker imageWorker = new ....
+
+            imageWorker.set
+
+
+
+            ImageLoader.getInstance().load(imageWorker);/
 
         }
     }
 
-
+    @Override
+    public void onRecycled() {
+        super.onRecycled();
+        ImageWorker.getInstance().clearView(mAvatar); //?
+    }
 }

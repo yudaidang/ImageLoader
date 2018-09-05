@@ -13,4 +13,7 @@ public class BaseViewHolder<T extends BaseViewItem> extends RecyclerView.ViewHol
     public void onBind(T item, int id) {
 
     }
+    public void onRecycled() {
+
+    }
 }

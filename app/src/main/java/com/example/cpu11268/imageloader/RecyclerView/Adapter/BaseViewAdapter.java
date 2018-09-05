@@ -17,8 +17,6 @@ import java.util.List;
 
 public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
-    private ImageWorker imageWorker = null;
-
     private List<BaseViewItem> mItems;
 
     private int TYPE_SMALL = 0;
@@ -34,7 +32,7 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public void onViewRecycled(@NonNull BaseViewHolder holder) {
         super.onViewRecycled(holder);
-        imageWorker.clearView(((NewFeedHolder) holder).mAvatar);
+        holder.onRecycled();
         Log.d("YUDAIDANGOVR ", "onViewRecycled " + ((NewFeedHolder) holder).mAvatar);
     }
 
@@ -42,20 +40,16 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        if (imageWorker == null) {
-            imageWorker = new ImageWorker(parent.getContext().getApplicationContext());
-
-        }
         BaseViewHolder holder;
 
         if (viewType == TYPE_SMALL) {
             View view = inflater.inflate(R.layout.newfeeditem, parent, false);
-            holder = new NewFeedHolder(view, parent.getContext(), imageWorker);
+            holder = new NewFeedHolder(view, parent.getContext());
 
             return holder;
         } else if (viewType == TYPE_LARGE) {
             View view = inflater.inflate(R.layout.newfeedlargeitem, parent, false);
-            holder = new NewFeedHolder(view, parent.getContext(), imageWorker);
+            holder = new NewFeedHolder(view, parent.getContext());
 
             return holder;
         }
