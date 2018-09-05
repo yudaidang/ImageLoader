@@ -140,8 +140,6 @@ public class ImageWorker implements Handler.Callback {//generic
     }
 
     public void loadImage(final String mUrl, ImageView mView) {
-        this.mWidth = (int) (view.get().getLayoutParams().width / (Resources.getSystem().getDisplayMetrics().density));
-        this.mHeight = (int) (view.get().getLayoutParams().height / (Resources.getSystem().getDisplayMetrics().density));
         loadImage(mUrl, mView, new CallBackImageView(mView));
     }
 
@@ -157,8 +155,13 @@ public class ImageWorker implements Handler.Callback {//generic
      */
 
     public void loadImage(final String mUrl, View mView, MyDownloadCallback callback) {
+        if(view != null){
+            this.mWidth = (int) (view.get().getLayoutParams().width / (Resources.getSystem().getDisplayMetrics().density));
+            this.mHeight = (int) (view.get().getLayoutParams().height / (Resources.getSystem().getDisplayMetrics().density));
+        }
         this.view = new WeakReference<>(mView);
         this.mUrlTemp = mUrl;
+
         ValueBitmapMemCache valueBitmapMemCache;
 
         if (mUrl == null) {

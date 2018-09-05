@@ -3,6 +3,7 @@ package com.example.cpu11268.imageloader.ImageLoader;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.util.LruCache;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmapMemCache;

@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
+import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmapMemCache;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
@@ -87,7 +88,7 @@ public class DiskBitmapRunnable implements Runnable {
                 mMaxSize = true;
             } else {
                 bitmap = imageCache.getBitmapFromDiskCache(imgUrl, width, height, options);
-
+                Log.d("YUHUHUHU ", bitmap.getByteCount() + "");
             }
             imageCache.addBitmapToMemoryCacheTotal(imgUrl, new ValueBitmapMemCache(bitmap, width, height, mMaxSize));
             Message message = mHandler.obtainMessage(imgUrl.hashCode(), bitmap);

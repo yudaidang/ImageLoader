@@ -1,9 +1,10 @@
 package com.example.cpu11268.imageloader.RecyclerView.Holder;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,7 +23,6 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     public ImageView mAvatar;
     public TextView mId;
     String mLastUrl;
-    Handler mainUiHandler;
     private Context mContext;
     private ImageWorker imageWorker;
 
@@ -30,6 +30,15 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     public NewFeedHolder(View itemView, Context context, ImageWorker imageWorker) {
         super(itemView);
         this.imageWorker = imageWorker;
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int mMaxSizeMem = (int) (
+                (int) (displayMetrics.widthPixels / context.getResources().getDisplayMetrics().density) *
+                        (displayMetrics.heightPixels / context.getResources().getDisplayMetrics().density)
+                        * 4);// ARGB: 4, RGB: 3, BMP: 16, BMPS: 32
+
+        imageWorker.setSizeSmallMemCache(mMaxSizeMem);
+        imageWorker.setSizeLargeMemCache(mMaxSizeMem);
         temp++;
         mAvatar = itemView.findViewById(R.id.imageAvatar);
         mContext = context.getApplicationContext();

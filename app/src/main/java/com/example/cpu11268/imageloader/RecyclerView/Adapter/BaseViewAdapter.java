@@ -44,6 +44,7 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         if (imageWorker == null) {
             imageWorker = new ImageWorker(parent.getContext().getApplicationContext());
+
         }
         BaseViewHolder holder;
 

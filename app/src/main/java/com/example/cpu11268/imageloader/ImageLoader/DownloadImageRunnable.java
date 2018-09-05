@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
+import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.AddImageRunnable;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkCheck;
@@ -105,6 +106,8 @@ public class DownloadImageRunnable implements Runnable {
             int mTempWidth = options.outWidth;
             int mTempHeight = options.outHeight;
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+            Log.d("YUHUHUHU ", bitmap.getByteCount() + "");
+
             if (mTempWidth == bitmap.getWidth() && mTempHeight == bitmap.getHeight()) {
                 this.mMaxSize = true;
             }
