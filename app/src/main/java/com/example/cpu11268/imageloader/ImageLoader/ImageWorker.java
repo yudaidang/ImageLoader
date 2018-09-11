@@ -1,84 +1,46 @@
 package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Pair;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.CallBackImageView;
-import com.example.cpu11268.imageloader.ImageLoader.Ultils.InfoImageView;
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.ObjectArrayView;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.io.File;
 import java.util.HashMap;
-import java.util.concurrent.BlockingQueue;
+import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImageWorker implements Handler.Callback {//generic
     public static final int DEFAULT_SIZE_SAMPLE = -1;
-    private static Executor executor;
-    private static AtomicInteger seq = new AtomicInteger(0);
-    private static HashMap<String,ImageWorker> mListView = new HashMap<>();
-    private static HashMap<View, String> mListView = new HashMap<>();
-
     private final Handler mHandler;
-    private String mUrlTemp;
+    private Executor executor;
+    private Executor executorInternet;
+
+    private HashMap<MyDownloadCallback, ObjectArrayView> mListCallbackKey;
+    private HashMap<String, HashMap<MyDownloadCallback, View>> mListViewPlus;
+    private HashMap<View, MyDownloadCallback> mListView;
+    private String mUrl;
     private MyDownloadCallback mCallback;
+    private int mWidth;
+    private int mHeight;
+    private View view;
 
-    private static ImageWorker sInstance = new ImageWorker();
-
-    public static ImageWorker getInstance() {
-        return sInstance;
-    }
-
-    public ImageWorker() { //?
+    public ImageWorker(Executor executor, Executor executorInternet, HashMap<MyDownloadCallback, ObjectArrayView> mListCallbackKey,
+                       HashMap<String, HashMap<MyDownloadCallback, View>> mListViewPlus,
+                       HashMap<View, MyDownloadCallback> mListView) {
         mHandler = new Handler(this);
-
-        if (executor == null) {
-            BlockingQueue queue = new LinkedBlockingDeque() {
-
-                @Override
-                public boolean add(Object o) {
-                    if (contains(o)) {
-                        remove(o);
-                    }
-                    addFirst(o);
-                    return true;
-                }
-
-                @Override
-                public void put(Object o) throws InterruptedException {
-                    if (contains(o)) {
-                        remove(o);
-                    }
-                    super.putFirst(o);
-                }
-            };
-            executor = new ThreadPoolExecutor(
-                    2,
-                    3,
-                    60L,
-                    TimeUnit.SECONDS,
-
-                    queue);
-        }
-    }
-
-    public void setSizeSmallMemCache(int mMaxSize) {
-        ImageCache.getInstance().setSizeSmallMem(mMaxSize);
-    }
-
-    public void setSizeLargeMemCache(int mMaxSize) {
-        ImageCache.getInstance().setSizeLargeMem(mMaxSize);
+        this.mListView = mListView;
+        this.mListViewPlus = mListViewPlus;
+        this.mListCallbackKey = mListCallbackKey;
+        this.executor = executor;
+        this.executorInternet = executorInternet;
     }
 
     private void onDownloadComplete(Bitmap bitmap, MyDownloadCallback myDownloadCallback) {
@@ -87,96 +49,55 @@ public class ImageWorker implements Handler.Callback {//generic
         }
     }
 
-    //handle view bị recycle trong recyclerview
-    public void clearView(View mView) {
-        if (mListView.containsKey(this.mUrlTemp)) {
-            ArrayList<InfoImageView> list = mListView.get(this.mUrlTemp);
-            for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).getView() == mView) {
-                    list.remove(i);
-                    return;
-                }
-            }
+
+    public void setInfoImageWorker(String mUrl, MyDownloadCallback callback) {
+        this.mUrl = mUrl;
+        this.mCallback = callback;
+    }
+
+    public void setInfoImageWorker(String mUrl, ImageView imageView) {
+        this.mUrl = mUrl;
+        this.view = imageView;
+        if (imageView != null) {
+            this.mWidth = (int) (imageView.getLayoutParams().width / (Resources.getSystem().getDisplayMetrics().density));
+            this.mHeight = (int) (imageView.getLayoutParams().height / (Resources.getSystem().getDisplayMetrics().density));
         }
+        this.mCallback = new CallBackImageView(imageView);
     }
 
-    //handle call back bị recycle trong recyclerview
-    public void clearCallback(MyDownloadCallback callback) {
-        if (mListView.containsKey(this.mUrlTemp)) {
-            ArrayList<InfoImageView> list = mListView.get(this.mUrlTemp);
-            for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).getCallback() == callback) {
-                    list.remove(i);
-                    return;
-                }
-            }
-        }
+    public void setInfoImageWorker(int mWidth, int mHeight) {
+        this.mWidth = mWidth;
+        this.mHeight = mHeight;
     }
 
-    //handle cancel khi 1 view đang download image 1 thì download image 2
-    public void cancelSameViewLoading(View mView) {
-        for (String url : mListView.keySet()) {
-            ArrayList<InfoImageView> list = mListView.get(url);
+    public void loadImage(Context context) {
 
-            for (int i = 0; i < list.size(); i++) {
-                View v = list.get(i).getView();
-                if (v == mView && list.size() == 1) {
-                    mListView.remove(url);
-                    return;
-                } else if (v == mView) {
-                    list.remove(i);
-                    return;
-                }
-
-            }
-
-        }
-
-    }
-
-    public void loadImage(Context context, String mUrl, MyDownloadCallback callback) {
-        loadImage(context, mUrl, 0, 0, callback);
-    }
-
-    public void loadImage(Context context, String mUrl, ImageView mView) {
-        loadImage(context, mUrl, 0, 0, new CallBackImageView(mView));
-    }
-
-    /*
-        View: width, height
-        MyDownloadCallback: default is ImageView(CallBackImageView)
-        ValueBitmapMemCache:
-     */
-
-    public void loadImage(Context context, final String mUrl, int width, int height, MyDownloadCallback callback) {
-        this.mUrlTemp = mUrl;
-
-        ValueBitmapMemCache valueBitmapMemCache;
+        Bitmap bitmap;
 
         if (mUrl == null) {
-            onDownloadComplete(null, callback);
+            onDownloadComplete(null, mCallback);
             return;
         }
 
-        valueBitmapMemCache = ImageCache.getInstance().findBitmapCache(mUrl, width, height)
+        bitmap = ImageCache.getInstance().findBitmapCache(mUrl, mWidth, mHeight);
 
-        if (valueBitmapMemCache == null) {
-            ArrayList<MyDownloadCallback> list;
-            //Kiểm tra url có đang được download ko?
-            if (mListView.containsKey(mUrl)) { //?
-                list = mListView.get(mUrl);
-            } else {
-                list = new ArrayList<>();
-
-                DiskBitmapRunnable diskBitmapRunnable = new DiskBitmapRunnable(context, mUrl, mHandler, width, height);
+        if (bitmap == null) {
+            HashMap<MyDownloadCallback, View> mList = mListViewPlus.containsKey(mUrl) ? mListViewPlus.get(mUrl) : new HashMap<MyDownloadCallback, View>();
+            mList.put(mCallback, view);
+            if (!mListViewPlus.containsKey(mUrl)) {
+                DiskBitmapRunnable diskBitmapRunnable = new DiskBitmapRunnable(executorInternet, context, mUrl, mHandler,
+                        mWidth, mHeight);
                 executor.execute(diskBitmapRunnable);
-
             }
-            list.add(callback);
-            //add callback, view vào list đang được download với cùng url.
-            mListView.put(mUrl, list);
+            mListCallbackKey.put(mCallback, new ObjectArrayView(mUrl, view));
+            if (view != null) {
+                mListView.put(view, mCallback);
+            }
+            mListViewPlus.put(mUrl, mList);
+
+
         } else {
-            onDownloadComplete(valueBitmapMemCache.getBitmap(), callback);
+            onDownloadComplete(bitmap, mCallback);
         }
     }
 
@@ -184,26 +105,30 @@ public class ImageWorker implements Handler.Callback {//generic
     public boolean handleMessage(Message msg) {
         if (msg.what == DownloadImageRunnable.IMAGE_DOWNLOAD_RESULT_CODE || msg.what == DiskBitmapRunnable.IMAGE_LOADED_FROM_DISK_RESULT_CODE) {
 
-            Pair<String, Bitmap> pair = (Pair<String, Bitmap>) msg.obj;
-
-            String url = pair.first;
-            Bitmap bitmap = pair.second;
-
-            ImageCache.getInstance().addBitmapToMemoryCacheTotal(url, new ValueBitmapMemCache(bitmap, width, height, mMaxSize)); //?
+            MessageBitmap messageBitmap = (MessageBitmap) msg.obj;
+            if (messageBitmap.ismMaxSize() && mWidth == 0 && mHeight == 0) {
+                mWidth = messageBitmap.getmBitmap().getWidth();
+                mHeight = messageBitmap.getmBitmap().getHeight();
+            }
+            ImageCache.getInstance().addBitmapToMemoryCacheTotal(new ImageKey(messageBitmap.getmUrl(), mWidth, mHeight), new ValueBitmapMemCache(messageBitmap.getmBitmap(), messageBitmap.ismMaxSize())); //?
 
             //kiểm tra list đang được download có chứa url này không?
-            if (mListView.containsKey(url)) {
-                ArrayList<InfoImageView> list = mListView.get(url);
-                //return bitmap cho các callback với cùng url.
-                for (int i = 0; i < list.size(); i++) {
-                    onDownloadComplete(bitmap, list.get(i).getCallback());
-                }
-                mListView.remove(url);
+            if (mListViewPlus.containsKey(messageBitmap.getmUrl())) {
+                HashMap<MyDownloadCallback, View> list = mListViewPlus.get(messageBitmap.getmUrl());
 
+                for (Map.Entry<MyDownloadCallback, View> entry : list.entrySet()) {
+                    View view = entry.getValue();
+                    MyDownloadCallback callback = entry.getKey();
+                    onDownloadComplete(messageBitmap.getmBitmap(), callback);
+                    if (mListView.containsKey(view)) {
+                        mListView.remove(view);
+                    }
+                    mListCallbackKey.remove(callback);
+                }
+                mListViewPlus.remove(messageBitmap.getmUrl());
             }
             return true;
         }
-
         return false;
     }
 

@@ -59,13 +59,11 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
                 }
             };
 //            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), mAvatar);
-            ImageWorker imageWorker = new ....
-
-            imageWorker.set
-
+            //No signleton
+            //imageWorker.set(setwidth, height, url, callback, imageView)
 
 
-            ImageLoader.getInstance().load(imageWorker);/
+            ImageLoader.getInstance().load(mContext, item.getmNewFeed().getmUrlImage(), mAvatar);
 
         }
     }
@@ -73,6 +71,6 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     @Override
     public void onRecycled() {
         super.onRecycled();
-        ImageWorker.getInstance().clearView(mAvatar); //?
+//        ImageWorker.getInstance().clearView(mAvatar); //?
     }
 }

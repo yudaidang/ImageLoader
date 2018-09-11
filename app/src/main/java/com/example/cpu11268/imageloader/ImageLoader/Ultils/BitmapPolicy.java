@@ -34,8 +34,7 @@ public class BitmapPolicy {
     }
 
     public Bitmap read(File inputFile) {
-        Bitmap bitmap = BitmapFactory.decodeFile(inputFile.getAbsolutePath());
-        return bitmap;
+        return BitmapFactory.decodeFile(inputFile.getAbsolutePath());
     }
 
     private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {

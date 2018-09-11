@@ -1,11 +1,14 @@
 package com.example.cpu11268.imageloader.RecyclerView.Holder;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.cpu11268.imageloader.ImageLoader.ImageLoader;
 import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 import com.example.cpu11268.imageloader.R;
 import com.example.cpu11268.imageloader.RecyclerView.view_item.NewFeedItem;
@@ -48,16 +51,20 @@ public class NewFeedLargeHolder extends BaseViewHolder<NewFeedItem> {
         mLastUrl = id + "";
         final String idTemp = id + "";
         if (item != null) {
-/*            ImageWorker.MyDownloadCallback img = new ImageWorker.MyDownloadCallback() {
+            ImageWorker.MyDownloadCallback img = new ImageWorker.MyDownloadCallback() {
                 @Override
-                public void onLoad(Bitmap bitmap) {
+                public void onLoad(Bitmap bitmap, Object which, int resultCode) {
                     BitmapDrawable bm = new BitmapDrawable(mContext.getResources(), bitmap);
                     mAvatar.setBackground(bm);
                 }
-            };*/
-            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), mAvatar);
-/*            imageWorker.cancelSameViewLoading(mAvatar);
-            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), mAvatar, img);*/
+            };
+//            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), mAvatar);
+            //No signleton
+            //imageWorker.set(setwidth, height, url, callback, imageView)
+
+
+
+            ImageLoader.getInstance().load(mContext,  item.getmNewFeed().getmUrlImage(), mAvatar);
 
         }
     }

@@ -4,8 +4,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import java.lang.ref.WeakReference;
-
 public class NetworkChecker {
 
     public static boolean isOnline(Context context) {

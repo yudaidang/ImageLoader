@@ -1,22 +1,18 @@
 package com.example.cpu11268.imageloader.ImageLoader;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
-import android.util.Log;
-import android.util.Pair;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.AddImageRunnable;
-import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkChecker;
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
 
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.Executor;
@@ -35,6 +31,7 @@ public class DownloadImageRunnable implements Runnable {
     private Handler mHandler;
     private int width;
     private int height;
+    private boolean mMaxSize;
 
     public DownloadImageRunnable(String imgUrl, Handler mHandler, int width, int height) {
         this.imgUrl = imgUrl;
@@ -48,14 +45,8 @@ public class DownloadImageRunnable implements Runnable {
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-        try {
-            Thread.sleep(2000); //?
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         Bitmap bitmap = downloadImage(imgUrl);
-        Message message = mHandler.obtainMessage(IMAGE_DOWNLOAD_RESULT_CODE, new Pair<String, Bitmap>(imgUrl, bitmap));
+        Message message = mHandler.obtainMessage(IMAGE_DOWNLOAD_RESULT_CODE, new MessageBitmap(imgUrl, bitmap, mMaxSize));
         message.sendToTarget();
     }
 
@@ -92,7 +83,6 @@ public class DownloadImageRunnable implements Runnable {
             int mTempWidth = options.outWidth;
             int mTempHeight = options.outHeight;
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-            Log.d("YUHUHUHU ", bitmap.getByteCount() + "");
 
             if (mTempWidth == bitmap.getWidth() && mTempHeight == bitmap.getHeight()) {
                 this.mMaxSize = true;
