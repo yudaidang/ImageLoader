@@ -1,12 +1,15 @@
 package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.content.Context;
+import android.os.Environment;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ObjectArrayView;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -34,7 +37,7 @@ public class ImageLoader {
                     if (contains(o)) {
                         remove(o);
                     }
-                    addFirst(o);
+                    addLast(o);
                     return true;
                 }
 
@@ -43,7 +46,32 @@ public class ImageLoader {
                     if (contains(o)) {
                         remove(o);
                     }
-                    super.putFirst(o);
+                    super.putLast(o);
+                }
+
+                @Override
+                public boolean offer(Object o) {
+                    return offerLast(o);
+                }
+
+                @Override
+                public Object poll() {
+                    return pollLast();
+                }
+
+                @Override
+                public Object poll(long timeout, TimeUnit unit) throws InterruptedException {
+                    return super.pollLast(timeout, unit);
+                }
+
+                @Override
+                public Object take() throws InterruptedException {
+                    return takeLast();
+                }
+
+                @Override
+                public Object peek() {
+                    return super.peekLast();
                 }
             };
             executor = new ThreadPoolExecutor(
@@ -63,7 +91,7 @@ public class ImageLoader {
                     if (contains(o)) {
                         remove(o);
                     }
-                    addFirst(o);
+                    addLast(o);
                     return true;
                 }
 
@@ -72,7 +100,32 @@ public class ImageLoader {
                     if (contains(o)) {
                         remove(o);
                     }
-                    super.putFirst(o);
+                    super.putLast(o);
+                }
+
+                @Override
+                public boolean offer(Object o) {
+                    return offerLast(o);
+                }
+
+                @Override
+                public Object poll() {
+                    return pollLast();
+                }
+
+                @Override
+                public Object poll(long timeout, TimeUnit unit) throws InterruptedException {
+                    return super.pollLast(timeout, unit);
+                }
+
+                @Override
+                public Object take() throws InterruptedException {
+                    return takeLast();
+                }
+
+                @Override
+                public Object peek() {
+                    return super.peekLast();
                 }
             };
             executorInternet = new ThreadPoolExecutor(
@@ -89,7 +142,6 @@ public class ImageLoader {
         return sInstance;
     }
 
-
     public void setSizeSmallMemCache(int mMaxSize) {
         ImageCache.getInstance().setSizeSmallMem(mMaxSize);
     }
@@ -101,14 +153,14 @@ public class ImageLoader {
     public void load(Context context, String url, ImageWorker.MyDownloadCallback callback) {
         ImageWorker imageWorker = new ImageWorker(executor, executorInternet, mListCallbackKey, mListViewPlus, mListView);
         imageWorker.setInfoImageWorker(url, callback);
-        loadImageWorker(context, imageWorker);
+//        loadImageWorker(context, imageWorker);
     }
 
     public void load(Context context, String mUrl, ImageWorker.MyDownloadCallback callback, int width, int height) {
         ImageWorker imageWorker = new ImageWorker(executor, executorInternet, mListCallbackKey, mListViewPlus, mListView);
         imageWorker.setInfoImageWorker(width, height);
         imageWorker.setInfoImageWorker(mUrl, callback);
-        loadImageWorker(context, imageWorker);
+//        loadImageWorker(context, imageWorker);
 
     }
 
@@ -116,19 +168,71 @@ public class ImageLoader {
         ImageWorker imageWorker = new ImageWorker(executor, executorInternet, mListCallbackKey, mListViewPlus, mListView);
         imageWorker.setInfoImageWorker(width, height);
         imageWorker.setInfoImageWorker(mUrl, imageView);
-        loadImageWorker(context, imageWorker);
+//        loadImageWorker(context, imageWorker);
 
     }
 
-    public void load(Context context, String url, ImageView imageView) {
+    public void load(Context context, String url, ImageView imageView, String id) {
         ImageWorker imageWorker = new ImageWorker(executor, executorInternet, mListCallbackKey, mListViewPlus, mListView);
         imageWorker.setInfoImageWorker(url, imageView);
-        loadImageWorker(context, imageWorker);
+        loadImageWorker(context, imageWorker, id);
 
     }
 
-    private void loadImageWorker(Context context, ImageWorker imageWorker) {
-        imageWorker.loadImage(context);
+    private void loadImageWorker(Context context, ImageWorker imageWorker, String id) {
+        if (DiskCacheSimple.getInstance().getDiskCacheDir() == null) {
+            File diskCacheDir = getDiskCacheDir(context.getApplicationContext(), "IMAGE");
+            if (!diskCacheDir.exists()) {
+                diskCacheDir.mkdirs();
+            }
+            DiskCacheSimple.getInstance().setListFile(diskCacheDir);
+        }
+
+        imageWorker.loadImage(context, id);
+    }
+
+    public void clearView(View view) {
+        if (mListView.containsKey(view)) {
+            ImageWorker.MyDownloadCallback callback = mListView.get(view);
+            if (callback != null) {
+                ObjectArrayView object = mListCallbackKey.get(callback);
+                if (object != null && mListViewPlus.containsKey(object.getmUrl())) {
+                    mListViewPlus.get(object.getmUrl()).remove(callback);
+                }
+                mListCallbackKey.remove(callback);
+            }
+            mListView.remove(view);
+        }
+    }
+
+    public void clearCallback(ImageWorker.MyDownloadCallback callback) {
+        if (mListCallbackKey.containsKey(callback)) {
+            ObjectArrayView object = mListCallbackKey.get(callback);
+            if (object != null) {
+                View view = object.getView();
+                String mUrl = object.getmUrl();
+                if (view != null && mListView.containsKey(view)) {
+                    mListView.remove(view);
+                }
+                if (!mUrl.isEmpty()) {
+                    mListViewPlus.get(mUrl).remove(callback);
+                }
+            }
+            mListCallbackKey.remove(callback);
+        }
+    }
+
+    public void sameDownloadView(View view) {
+        clearView(view);
+
+    }
+
+    private File getDiskCacheDir(Context context, String uniqueName) {
+        final String cachePath =
+                Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ?
+                        Objects.requireNonNull(context.getExternalCacheDir()).getPath() :
+                        context.getCacheDir().getPath();
+        return new File(cachePath + File.separator + uniqueName);
     }
 
 

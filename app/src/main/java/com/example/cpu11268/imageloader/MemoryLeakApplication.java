@@ -34,21 +34,15 @@ public class MemoryLeakApplication extends Application {
 
         LeakCanary.install(this);
 
-        File diskCacheDir = getDiskCacheDir("IMAGE");
-        if (!diskCacheDir.exists()) {
-            diskCacheDir.mkdirs();
-        }
 
-
-        DiskCacheSimple.getInstance().setListFile(diskCacheDir);
     }
 
-    private File getDiskCacheDir(String uniqueName) {
+  /*  private File getDiskCacheDir(String uniqueName) {
         final String cachePath =
                 Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ?
                         Objects.requireNonNull(getExternalCacheDir()).getPath() :
                         getCacheDir().getPath();
         return new File(cachePath + File.separator + uniqueName);
-    }
+    }*/
 
 }

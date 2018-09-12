@@ -11,11 +11,11 @@
         android:layout_height="match_parent"/>
     <ImageView
         android:id="@+id/imageAvatar"
-        android:layout_width="360dp"
-        android:layout_height="640dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
         android:scaleType="fitXY"
         android:padding="10dp" />
-<!--    <LinearLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:orientation="vertical">
@@ -54,6 +54,6 @@
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:text="Đang tải file" />
-    </LinearLayout>-->
+    </LinearLayout>
 </LinearLayout>
 

@@ -1,10 +1,9 @@
 package com.example.cpu11268.imageloader.RecyclerView.Holder;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,13 +28,13 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
 
     public NewFeedHolder(View itemView, Context context) {
         super(itemView);
-        DisplayMetrics displayMetrics = new DisplayMetrics(); //?
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics); //?
+/*        DisplayMetrics displayMetrics = new DisplayMetrics(); //?
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics); //?*/
         temp++;
         mAvatar = itemView.findViewById(R.id.imageAvatar);
         mContext = context.getApplicationContext(); //?
         mId = itemView.findViewById(R.id.idItem);
-
+        mName = itemView.findViewById(R.id.nameTest);
     }
 
     @Override
@@ -46,7 +45,7 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
 
         mId.setText(id + "");
 
-        mAvatar.setBackground(null);
+        mAvatar.setImageBitmap(null);
         itemView.setTag(item);
         mLastUrl = id + "";
         final String idTemp = id + "";
@@ -61,16 +60,18 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
 //            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), mAvatar);
             //No signleton
             //imageWorker.set(setwidth, height, url, callback, imageView)
+            Log.d("HAHAHAHA", idTemp + " " + item.getmNewFeed().getmUrlImage() + " " + mAvatar);
 
-
-            ImageLoader.getInstance().load(mContext, item.getmNewFeed().getmUrlImage(), mAvatar);
-
+            ImageLoader.getInstance().load(mContext, item.getmNewFeed().getmUrlImage(), mAvatar, idTemp);
+            mName.setText(item.getmNewFeed().getmName());
         }
     }
 
     @Override
     public void onRecycled() {
         super.onRecycled();
+        ImageLoader.getInstance().clearView(mAvatar);
+
 //        ImageWorker.getInstance().clearView(mAvatar); //?
     }
 }

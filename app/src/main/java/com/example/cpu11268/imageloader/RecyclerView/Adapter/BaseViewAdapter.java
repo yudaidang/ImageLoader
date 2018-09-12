@@ -28,11 +28,9 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         this.mItems = mItems;
         setHasStableIds(true);
     }
-
     @Override
     public void onViewRecycled(@NonNull BaseViewHolder holder) {
         super.onViewRecycled(holder);
-        holder.onRecycled();
         Log.d("YUDAIDANGOVR ", "onViewRecycled " + ((NewFeedHolder) holder).mAvatar);
     }
 
@@ -40,20 +38,21 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+
         BaseViewHolder holder;
 
-        if (viewType == TYPE_SMALL) {
+//        if (viewType == TYPE_SMALL) {
             View view = inflater.inflate(R.layout.newfeeditem, parent, false);
             holder = new NewFeedHolder(view, parent.getContext());
 
             return holder;
-        } else if (viewType == TYPE_LARGE) {
+    /*    } else if (viewType == TYPE_LARGE) {
             View view = inflater.inflate(R.layout.newfeedlargeitem, parent, false);
             holder = new NewFeedHolder(view, parent.getContext());
 
             return holder;
         }
-        return null;
+        return null;*/
     }
 
 
@@ -61,20 +60,10 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     public void onBindViewHolder(@NonNull final BaseViewHolder holder, int position) {
         holder.onBind(mItems.get(position), position);
         Log.d("Yu BaseHolder: ", "onBindViewHolder " + position);
-/*
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final int position = holder.getAdapterPosition();
-                Log.d("Yu: ", position + " ");
-                NewFeed model = new NewFeed("Yudaidang", "2 hours", "ahihi", "http://iforo.3djuegos.com/files_foros/89/894.jpg");
-            }
-        });*/
     }
 
     @Override
     public long getItemId(int position) {
-//        return position == 0 ? 1 : super.getItemId(position);
         return position;
     }
 
@@ -85,15 +74,16 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        if (position % 2 == 0) {
+/*        if (position % 2 == 0) {
             return TYPE_SMALL;
         } else {
             return TYPE_LARGE;
-        }
-/*        if (mItems.get(position) != null)
+        }*/
+        if (mItems.get(position) != null)
             return mItems.get(position).getViewType();
         else
-            return 10;*/
+            return 10;
     }
+
 
 }

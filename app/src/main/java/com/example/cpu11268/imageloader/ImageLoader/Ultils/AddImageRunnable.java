@@ -6,6 +6,7 @@ public class AddImageRunnable implements Runnable {
 
     private String mImageUrl;
     private byte[] mBytes;
+
     public AddImageRunnable(String mImageUrl, byte[] mBytes) {
         this.mImageUrl = mImageUrl;
         this.mBytes = mBytes;
@@ -13,6 +14,6 @@ public class AddImageRunnable implements Runnable {
 
     @Override
     public void run() {
-        ImageCache.getInstance().addBitmapToDiskCache( mImageUrl, mBytes);
+        ImageCache.getInstance().addBitmapToDiskCache(mImageUrl, mBytes);
     }
 }

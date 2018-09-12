@@ -11,10 +11,10 @@
         android:layout_height="match_parent"/>
     <ImageView
         android:id="@+id/imageAvatar"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         android:padding="10dp" />
-<!--    <LinearLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:orientation="vertical">
@@ -36,23 +36,8 @@
                 android:textSize="14dp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/timeTest"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:text="50m"
-                android:textSize="12sp" />
         </RelativeLayout>
 
-
-        <TextView
-            android:id="@+id/txtMessage"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:gravity="center_vertical"
-            android:paddingLeft="10dp"
-            android:text="Đang tải file" />
-    </LinearLayout>-->
+    </LinearLayout>
 </LinearLayout>
 

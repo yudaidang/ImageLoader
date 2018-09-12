@@ -17,13 +17,13 @@ import java.util.List;
 import java.util.Map;
 
 public class DiskCacheSimple {
-    private static final int DEFAULT_MAX_SIZE = 1024 * 1024;
+    private static final int DEFAULT_MAX_SIZE = 1024 * 1024 * 30;
     private static DiskCacheSimple sInstance = new DiskCacheSimple();
     private BitmapPolicy mBitmapPolicy;
     private LinkedHashMap mFilesInCache;
     private long mCurrentSize;
     private int mMaxSize = DEFAULT_MAX_SIZE;
-    private File diskCacheDir;
+    private File diskCacheDir = null;
 
     private DiskCacheSimple() {
         mBitmapPolicy = new BitmapPolicy();
@@ -31,6 +31,10 @@ public class DiskCacheSimple {
 
     public static DiskCacheSimple getInstance() {
         return sInstance;
+    }
+
+    public File getDiskCacheDir(){
+        return diskCacheDir;
     }
 
     public void setListFile(File f) {
@@ -60,7 +64,6 @@ public class DiskCacheSimple {
                 return 0;
             }
         });
-
         for (Object entry : allFiles) {
             addEntryToHash((Entry) entry);
         }

@@ -2,6 +2,7 @@ package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.util.LruCache;
 
 public class ImageCache {
@@ -9,7 +10,6 @@ public class ImageCache {
     private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCache;
     private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCacheLarge;
     private static ImageCache sInstance = new ImageCache();
-    private final Object mDiskCacheLock = new Object();
 
     private int maxMemory = (int) Runtime.getRuntime().maxMemory();
     private int cacheSize = maxMemory / 8;
@@ -19,14 +19,18 @@ public class ImageCache {
         mMemoryCache = new LruCache<ImageKey, ValueBitmapMemCache>(cacheSize) {
             @Override
             protected int sizeOf(ImageKey key, ValueBitmapMemCache value) {
-                return value.getBitmap().getByteCount();
+                Log.d("BITMAP ", value + " ");
+                if (value.getBitmap() != null) {
+                    return value.getBitmap().getByteCount();
+                }
+                return 0;
             }
         };
 
         mMemoryCacheLarge = new LruCache<ImageKey, ValueBitmapMemCache>(cacheSize) {
             @Override
             protected int sizeOf(ImageKey key, ValueBitmapMemCache value) {
-                return value.getBitmap().getByteCount();
+                return value != null ? value.getBitmap().getByteCount() : 0;
             }
         };
 
