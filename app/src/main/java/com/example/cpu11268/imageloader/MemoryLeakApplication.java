@@ -3,6 +3,7 @@ package com.example.cpu11268.imageloader;
 import android.app.Application;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.DiskCacheSimple;
 import com.example.cpu11268.imageloader.ImageLoader.ImageCache;
@@ -28,7 +29,6 @@ public class MemoryLeakApplication extends Application {
         int mMaxSizeMem = (int) (
                 (int) (display.widthPixels / getResources().getDisplayMetrics().density)
                         * (display.heightPixels / getResources().getDisplayMetrics().density) * 4);// ARGB: 4, RGB: 3, BMP: 16, BMPS: 32
-
         ImageCache.getInstance().setSizeLargeMem(mMaxSizeMem);
         ImageCache.getInstance().setSizeSmallMem(mMaxSizeMem);
 

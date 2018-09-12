@@ -60,7 +60,22 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
 //            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), mAvatar);
             //No signleton
             //imageWorker.set(setwidth, height, url, callback, imageView)
-            Log.d("HAHAHAHA", idTemp + " " + item.getmNewFeed().getmUrlImage() + " " + mAvatar);
+
+//            int w = mAvatar.getMaxWidth();
+//            int h = mAvatar.getMaxHeight();
+
+//            Log.d("HAHAHAHA", idTemp + " " + item.getmNewFeed().getmUrlImage() + " " + mAvatar);
+
+
+
+
+
+
+
+
+
+
+
 
             ImageLoader.getInstance().load(mContext, item.getmNewFeed().getmUrlImage(), mAvatar, idTemp);
             mName.setText(item.getmNewFeed().getmName());

@@ -1525,7 +1525,7 @@ public class MainActivity extends AppCompatActivity {
 
     private List<BaseViewItem> buildItems() {
         List<BaseViewItem> items = new ArrayList<>(60);
-      /*  items.add(mockNewFeedItem("A.Hiệp ", getRandomTime(), getRandomMessage(), "https://f28-org-zp.zdn.vn/73c4cc524b22a17cf833.jpg"));
+        items.add(mockNewFeedItem("A.Hiệp ", getRandomTime(), getRandomMessage(), "https://f28-org-zp.zdn.vn/73c4cc524b22a17cf833.jpg"));
         items.add(mockNewFeedItem("A.Hiệp ", getRandomTime(), getRandomMessage(), "https://f28-org-zp.zdn.vn/73c4cc524b22a17cf833.jpg"));
         items.add(mockNewFeedItem("A.Quang", getRandomTime(), getRandomMessage(), "https://f26-org-zp.zdn.vn/a0400648beab55f50cba.jpg"));
         items.add(mockNewFeedItem("Trúc", getRandomTime(), getRandomMessage(), "https://f16-org-zp.zdn.vn/b90c683372279a79c336.jpg"));
@@ -1607,7 +1607,8 @@ public class MainActivity extends AppCompatActivity {
         items.add(mockNewFeedItem("Nobita", getRandomTime(), getRandomMessage(), "https://kenh14cdn.com/2016/no1-1477035072122.jpg"));
         items.add(mockNewFeedItem("Xuka", getRandomTime(), getRandomMessage(), "http://file.vforum.vn/hinh/2018/02/hinh-anh-hinh-nen-xuka-dep-buon-de-thuong-13.png"));
         items.add(mockNewFeedItem("Xeko", getRandomTime(), getRandomMessage(), "https://yt3.ggpht.com/a-/AN66SAwvDxfAYpKYbVYy90TY2c3saqrAI05gAl4mvg=s900-mo-c-c0xffffffff-rj-k-no"));
-        items.add(mockNewFeedItem("Chaien", getRandomTime(), getRandomMessage(), "https://s3-ap-southeast-1.amazonaws.com/source.nupacachi.com/images/character/chaien.png"));*/
+        items.add(mockNewFeedItem("Chaien", getRandomTime(), getRandomMessage(), "https://s3-ap-southeast-1.amazonaws.com/source.nupacachi.com/images/character/chaien.png"));
+      /*  items.add(mockNewFeedItem(getRandomName(), getRandomTime(), getRandomMessage(), getRandomUrl()));
         items.add(mockNewFeedItem(getRandomName(), getRandomTime(), getRandomMessage(), getRandomUrl()));
         items.add(mockNewFeedItem(getRandomName(), getRandomTime(), getRandomMessage(), getRandomUrl()));
         items.add(mockNewFeedItem(getRandomName(), getRandomTime(), getRandomMessage(), getRandomUrl()));
@@ -1733,8 +1734,7 @@ public class MainActivity extends AppCompatActivity {
         items.add(mockNewFeedItem(getRandomName(), getRandomTime(), getRandomMessage(), getRandomUrl()));
         items.add(mockNewFeedItem(getRandomName(), getRandomTime(), getRandomMessage(), getRandomUrl()));
         items.add(mockNewFeedItem(getRandomName(), getRandomTime(), getRandomMessage(), getRandomUrl()));
-        items.add(mockNewFeedItem(getRandomName(), getRandomTime(), getRandomMessage(), getRandomUrl()));
-        items.add(mockNewFeedItem(getRandomName(), getRandomTime(), getRandomMessage(), getRandomUrl()));
+        items.add(mockNewFeedItem(getRandomName(), getRandomTime(), getRandomMessage(), getRandomUrl()));*/
 
 
         return items;

@@ -2,24 +2,32 @@ package com.example.cpu11268.imageloader.ImageLoader.Ultils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class BitmapPolicy {
 
     public void write(File outputFile, byte[] value) throws IOException {
-        FileOutputStream out = null;
+        BufferedOutputStream buf = null;
         try {
-            out = new FileOutputStream(outputFile);
-            BufferedOutputStream buf = new BufferedOutputStream(out);
+            FileOutputStream fl = new FileOutputStream(outputFile);
+            buf = new BufferedOutputStream(fl );
+            Log.d("BITMAPPOLICY ", value.length + " "+ outputFile.getAbsolutePath());
             buf.write(value);
-        } finally {
-            if (out != null) {
-                out.flush();
-                out.close();
+        }catch(Exception ex){
+            Log.e("LOGLOG", ex.getMessage());
+        }
+        finally {
+            if (buf != null) {
+
+                buf.flush();
+                buf.close();
             }
         }
     }

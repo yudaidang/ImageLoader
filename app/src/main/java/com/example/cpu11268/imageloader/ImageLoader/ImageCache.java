@@ -19,19 +19,27 @@ public class ImageCache {
         mMemoryCache = new LruCache<ImageKey, ValueBitmapMemCache>(cacheSize) {
             @Override
             protected int sizeOf(ImageKey key, ValueBitmapMemCache value) {
-                Log.d("BITMAP ", value + " ");
-                if (value.getBitmap() != null) {
-                    return value.getBitmap().getByteCount();
+                int bitmapSize = 0;
+                try {
+                    bitmapSize = value.getBitmap().getByteCount()/1024;
+                }catch (Exception ex){
+                    Log.d("CRASH ",  key.getmUrl() + " "+ key.getmUrl().hashCode() );
                 }
-                return 0;
+                return bitmapSize == 0 ? 1 : bitmapSize;
+
             }
         };
 
         mMemoryCacheLarge = new LruCache<ImageKey, ValueBitmapMemCache>(cacheSize) {
             @Override
             protected int sizeOf(ImageKey key, ValueBitmapMemCache value) {
-                return value != null ? value.getBitmap().getByteCount() : 0;
-            }
+                int bitmapSize = 0;
+                try {
+                    bitmapSize = value.getBitmap().getByteCount()/1024;
+                }catch (Exception ex){
+                    Log.d("CRASH ",    key.getmUrl() + " CRASH " + key.getmUrl().hashCode()  );
+                }
+                return bitmapSize == 0 ? 1 : bitmapSize;         }
         };
 
     }

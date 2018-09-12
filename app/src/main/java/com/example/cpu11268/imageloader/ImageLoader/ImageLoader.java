@@ -2,6 +2,8 @@ package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.content.Context;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -19,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by hungnq3 on 05/09/18.
  */
-public class ImageLoader {
+public class ImageLoader implements Handler.Callback{
 
     private static ImageLoader sInstance = new ImageLoader();
     private static Executor executorInternet;
@@ -236,4 +238,8 @@ public class ImageLoader {
     }
 
 
+    @Override
+    public boolean handleMessage(Message msg) {
+        return false;
+    }
 }

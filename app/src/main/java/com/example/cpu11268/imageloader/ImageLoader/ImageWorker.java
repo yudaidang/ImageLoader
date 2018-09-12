@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -13,15 +12,12 @@ import com.example.cpu11268.imageloader.ImageLoader.Ultils.CallBackImageView;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ObjectArrayView;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.ListIterator;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 public class ImageWorker implements Handler.Callback {//generic
-    public static final int DEFAULT_SIZE_SAMPLE = -1;
+    public static final int DEFAULT_SIZE_SAMPLE = 0;
     private final Handler mHandler;
     private Executor executor;
     private Executor executorInternet;
@@ -48,10 +44,8 @@ public class ImageWorker implements Handler.Callback {//generic
     }
 
 
-
     private void onDownloadComplete(Bitmap bitmap, MyDownloadCallback myDownloadCallback, String idTemp) {
         if (myDownloadCallback != null) {
-            Log.d("KKKKKK", idTemp + " ");
             myDownloadCallback.onLoad(bitmap, null, 0);
         }
     }
@@ -101,8 +95,6 @@ public class ImageWorker implements Handler.Callback {//generic
                 mListView.put(view, mCallback);
             }
             mListViewPlus.put(mUrl, mList);
-            Log.d("jkkkkkkkkkkkkkkkk", id + " " +mUrl + " " + mCallback + " " + view);
-
 
         } else {
             onDownloadComplete(bitmap, mCallback, id);
@@ -124,11 +116,11 @@ public class ImageWorker implements Handler.Callback {//generic
             if (mListViewPlus.containsKey(messageBitmap.getmUrl())) {
                 HashMap<MyDownloadCallback, View> list = mListViewPlus.get(messageBitmap.getmUrl());
                 ArrayList listKey = new ArrayList(list.keySet());
-                for(int i = listKey.size() - 1; i>=0; i--){
+                for (int i = listKey.size() - 1; i >= 0; i--) {
                     MyDownloadCallback callback = (MyDownloadCallback) listKey.get(i);
                     View view = list.get(callback);
                     onDownloadComplete(messageBitmap.getmBitmap(), callback, idTemp);
-                    if(mListView.containsKey(view)){
+                    if (mListView.containsKey(view)) {
                         mListView.remove(view);
                     }
                     mListCallbackKey.remove(callback);

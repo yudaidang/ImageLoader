@@ -2,6 +2,7 @@ package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.BitmapPolicy;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.Entry;
@@ -33,7 +34,7 @@ public class DiskCacheSimple {
         return sInstance;
     }
 
-    public File getDiskCacheDir(){
+    public File getDiskCacheDir() {
         return diskCacheDir;
     }
 
@@ -109,24 +110,25 @@ public class DiskCacheSimple {
         return true;
     }
 
-    private void removeFromHash(Entry entry) {
+    private synchronized void removeFromHash(Entry entry) {
         entry.file.delete();
         mFilesInCache.remove(entry.key);
         mCurrentSize -= entry.sizeBytes;
     }
 
     public boolean isExistFile(String key) {
-
-        return mFilesInCache.containsKey(key.hashCode());
+        File file = new File(diskCacheDir, key.hashCode() + "");
+        return file.exists() && file.length() != 0;
+//        return mFilesInCache.containsKey(key.hashCode());
 
     }
 
-    public Bitmap get(String key) {
+    public synchronized Bitmap get(String key) {
         Entry cachedData = (Entry) mFilesInCache.get(key.hashCode());
         return cachedData != null ? mBitmapPolicy.read(cachedData.file) : null;
     }
 
-    public Bitmap get(String key, int width, int height, BitmapFactory.Options options) {
+    public synchronized Bitmap get(String key, int width, int height, BitmapFactory.Options options) {
 
         Entry cachedData = (Entry) mFilesInCache.get(key.hashCode());
         return cachedData != null ? mBitmapPolicy.read(cachedData.file, width, height, options) : null;
@@ -144,16 +146,16 @@ public class DiskCacheSimple {
         if (cachedData != null) {
             removeFromHash(cachedData);
         }
+        if (value.length != 0) {
+            try {
+                mBitmapPolicy.write(new File(diskCacheDir, Integer.toString(hash)), value);
+            } catch (IOException ex) {
+                return false;
+            }
+            cachedData = new Entry(new File(diskCacheDir, Integer.toString(hash)), mBitmapPolicy.size(value), key.hashCode());
 
-        try {
-            mBitmapPolicy.write(new File(diskCacheDir, Integer.toString(hash)), value);
-        } catch (IOException ex) {
-            return false;
+            addEntryToHash(cachedData);
         }
-
-        cachedData = new Entry(new File(diskCacheDir, Integer.toString(hash)), mBitmapPolicy.size(value), key.hashCode());
-        addEntryToHash(cachedData);
-
         return true;
     }
 
