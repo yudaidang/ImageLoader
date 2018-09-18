@@ -32,7 +32,6 @@ public class DownloadImageRunnable implements Runnable {
     private int width;
     private int height;
     private boolean mMaxSize;
-
     public DownloadImageRunnable(String imgUrl, Handler mHandler, int width, int height) {
         this.imgUrl = imgUrl;
         this.mHandler = mHandler;
@@ -44,9 +43,9 @@ public class DownloadImageRunnable implements Runnable {
     public void run() {
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
         Bitmap bitmap = downloadImage(imgUrl);
-        Message message = mHandler.obtainMessage(IMAGE_DOWNLOAD_RESULT_CODE, new MessageBitmap(imgUrl, bitmap, mMaxSize));
+        MessageBitmap messageBitmap = new MessageBitmap(imgUrl, bitmap, mMaxSize);
+        Message message = mHandler.obtainMessage(IMAGE_DOWNLOAD_RESULT_CODE, messageBitmap);
         message.sendToTarget();
     }
 
@@ -83,6 +82,7 @@ public class DownloadImageRunnable implements Runnable {
             int mTempWidth = options.outWidth;
             int mTempHeight = options.outHeight;
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+            ImageCache.getInstance().addBitmapToMemoryCacheTotal(new ImageKey(imgUrl, width, height), new ValueBitmapMemCache(bitmap, mMaxSize)); //?
 
             if (mTempWidth == bitmap.getWidth() && mTempHeight == bitmap.getHeight()) {
                 this.mMaxSize = true;

@@ -2,7 +2,6 @@ package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.util.LruCache;
 
 public class ImageCache {
@@ -19,13 +18,7 @@ public class ImageCache {
         mMemoryCache = new LruCache<ImageKey, ValueBitmapMemCache>(cacheSize) {
             @Override
             protected int sizeOf(ImageKey key, ValueBitmapMemCache value) {
-                int bitmapSize = 0;
-                try {
-                    bitmapSize = value.getBitmap().getByteCount()/1024;
-                }catch (Exception ex){
-                    Log.d("CRASH ",  key.getmUrl() + " "+ key.getmUrl().hashCode() );
-                }
-                return bitmapSize == 0 ? 1 : bitmapSize;
+                return value.getBitmap().getByteCount() / 1024;
 
             }
         };
@@ -33,13 +26,8 @@ public class ImageCache {
         mMemoryCacheLarge = new LruCache<ImageKey, ValueBitmapMemCache>(cacheSize) {
             @Override
             protected int sizeOf(ImageKey key, ValueBitmapMemCache value) {
-                int bitmapSize = 0;
-                try {
-                    bitmapSize = value.getBitmap().getByteCount()/1024;
-                }catch (Exception ex){
-                    Log.d("CRASH ",    key.getmUrl() + " CRASH " + key.getmUrl().hashCode()  );
-                }
-                return bitmapSize == 0 ? 1 : bitmapSize;         }
+                return value.getBitmap().getByteCount() / 1024;
+            }
         };
 
     }

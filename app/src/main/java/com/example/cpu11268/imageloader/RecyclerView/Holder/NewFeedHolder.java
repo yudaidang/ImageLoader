@@ -13,6 +13,10 @@ import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 import com.example.cpu11268.imageloader.R;
 import com.example.cpu11268.imageloader.RecyclerView.view_item.NewFeedItem;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     private static int temp = 0;
     private static int temp1 = 0;
@@ -24,12 +28,10 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     public TextView mId;
     String mLastUrl;
     private Context mContext;
-
+    private HashMap<Integer, ImageWorker.MyDownloadCallback> listView = new HashMap<>();
 
     public NewFeedHolder(View itemView, Context context) {
         super(itemView);
-/*        DisplayMetrics displayMetrics = new DisplayMetrics(); //?
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics); //?*/
         temp++;
         mAvatar = itemView.findViewById(R.id.imageAvatar);
         mContext = context.getApplicationContext(); //?
@@ -44,49 +46,37 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
         id++;
 
         mId.setText(id + "");
-
-        mAvatar.setImageBitmap(null);
+        mAvatar.setBackground(null);
         itemView.setTag(item);
         mLastUrl = id + "";
         final String idTemp = id + "";
         if (item != null) {
-            ImageWorker.MyDownloadCallback img = new ImageWorker.MyDownloadCallback() {
+/*            ImageWorker.MyDownloadCallback img = new ImageWorker.MyDownloadCallback() {
                 @Override
                 public void onLoad(Bitmap bitmap, Object which, int resultCode) {
+
                     BitmapDrawable bm = new BitmapDrawable(mContext.getResources(), bitmap);
                     mAvatar.setBackground(bm);
                 }
             };
-//            imageWorker.loadImage(item.getmNewFeed().getmUrlImage(), mAvatar);
-            //No signleton
-            //imageWorker.set(setwidth, height, url, callback, imageView)
+            if(listView.containsKey(mAvatar.hashCode())){
+                ImageLoader.getInstance().clearCallback(listView.get(mAvatar.hashCode()));
+            }
+            listView.put(mAvatar.hashCode(), img);*/
 
-//            int w = mAvatar.getMaxWidth();
-//            int h = mAvatar.getMaxHeight();
+            ImageWorker imageWorker = new ImageWorker(item.getmNewFeed().getmUrlImage(), mAvatar);
+/*            ImageWorker imageWorker = new ImageWorker(item.getmNewFeed().getmUrlImage(), img);
 
-//            Log.d("HAHAHAHA", idTemp + " " + item.getmNewFeed().getmUrlImage() + " " + mAvatar);
+            imageWorker.setWidthHeight(40, 40);*/
+            ImageLoader.getInstance().loadImageWorker(mContext, imageWorker);
 
-
-
-
-
-
-
-
-
-
-
-
-            ImageLoader.getInstance().load(mContext, item.getmNewFeed().getmUrlImage(), mAvatar, idTemp);
             mName.setText(item.getmNewFeed().getmName());
+
         }
     }
 
     @Override
     public void onRecycled() {
         super.onRecycled();
-        ImageLoader.getInstance().clearView(mAvatar);
-
-//        ImageWorker.getInstance().clearView(mAvatar); //?
     }
 }

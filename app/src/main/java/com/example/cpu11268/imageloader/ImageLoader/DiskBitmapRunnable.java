@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
+import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkChecker;
@@ -42,7 +43,6 @@ public class DiskBitmapRunnable implements Runnable {
         Bitmap bitmap;
 
         boolean mMaxSize = false;
-
         if (ImageCache.getInstance().isBitmapFromDiskCache(imgUrl)) {
             if (width == ImageWorker.DEFAULT_SIZE_SAMPLE || height == ImageWorker.DEFAULT_SIZE_SAMPLE) {
                 bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imgUrl);
@@ -64,11 +64,11 @@ public class DiskBitmapRunnable implements Runnable {
                 handleResult(imgUrl, null);
             }
         }
-
     }
 
     private void handleResult(String url, Bitmap bitmap) {
-        Message message = mHandler.obtainMessage(IMAGE_LOADED_FROM_DISK_RESULT_CODE, new MessageBitmap(url, bitmap, false));
+        MessageBitmap messageBitmap = new MessageBitmap(url, bitmap, false);
+        Message message = mHandler.obtainMessage(IMAGE_LOADED_FROM_DISK_RESULT_CODE, messageBitmap);
         message.sendToTarget();
     }
 
