@@ -71,7 +71,6 @@ public class DownloadImageRunnable implements Runnable {
             AddImageRunnable addImageRunnable = new AddImageRunnable(imgUrl, bytes);
             mExecutor.execute(addImageRunnable);
 
-            //*****
             if (width != ImageWorker.DEFAULT_SIZE_SAMPLE || height != ImageWorker.DEFAULT_SIZE_SAMPLE) {
                 options.inJustDecodeBounds = true;
                 BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
@@ -87,7 +86,6 @@ public class DownloadImageRunnable implements Runnable {
             if (mTempWidth == bitmap.getWidth() && mTempHeight == bitmap.getHeight()) {
                 this.mMaxSize = true;
             }
-            //*****
 
         } catch (IOException e) {
             e.printStackTrace();

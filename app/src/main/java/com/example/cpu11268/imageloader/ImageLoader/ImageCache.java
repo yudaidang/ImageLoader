@@ -5,7 +5,7 @@ import android.graphics.BitmapFactory;
 import android.util.LruCache;
 
 public class ImageCache {
-    public static final int DEFAULT_MAX_SIZE = 66000; //?
+    public static final int DEFAULT_MAX_SIZE = 66000;
     private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCache;
     private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCacheLarge;
     private static ImageCache sInstance = new ImageCache();
@@ -13,7 +13,7 @@ public class ImageCache {
     private int maxMemory = (int) Runtime.getRuntime().maxMemory();
     private int cacheSize = maxMemory / 8;
 
-    private ImageCache() { //?
+    private ImageCache() {
 
         mMemoryCache = new LruCache<ImageKey, ValueBitmapMemCache>(cacheSize) {
             @Override
@@ -48,7 +48,7 @@ public class ImageCache {
     public synchronized void addBitmapToMemoryCacheTotal(ImageKey key, ValueBitmapMemCache bitmap) {
         if (bitmap == null)
             return;
-        if (key.getmHeight() * key.getmWidth() > DEFAULT_MAX_SIZE) {
+        if (key.getSize() * key.getSize() > DEFAULT_MAX_SIZE) {
             addBitmapToMemoryLargeCache(key, bitmap);
         } else {
             addBitmapToMemoryCache(key, bitmap);
@@ -75,7 +75,6 @@ public class ImageCache {
         return null;
     }
 
-    // Memory Cache
     private void addBitmapToMemoryCache(ImageKey key, ValueBitmapMemCache bitmap) { //?
         if (!isBitmapFromMemoryCache(key) && bitmap != null) {
             mMemoryCache.put(key, bitmap);
@@ -85,9 +84,7 @@ public class ImageCache {
     private boolean isBitmapFromMemoryCache(ImageKey key) { //?
         return mMemoryCache.snapshot().containsKey(key);
     }
-    //*
 
-    //Memory Large Cache
     private void addBitmapToMemoryLargeCache(ImageKey key, ValueBitmapMemCache bitmap) { //?
         if (!isBitmapFromMemoryLargeCache(key) && bitmap != null) {
             mMemoryCacheLarge.put(key, bitmap);
@@ -97,7 +94,6 @@ public class ImageCache {
     private boolean isBitmapFromMemoryLargeCache(ImageKey key) { //?
         return mMemoryCacheLarge.snapshot().containsKey(key);
     }
-    //*
 
     // Disk Cache
     public synchronized void addBitmapToDiskCache(String key, byte[] bytes) {
@@ -106,7 +102,7 @@ public class ImageCache {
         }
     }
 
-    public boolean isBitmapFromDiskCache(String key) { //?
+    public boolean isBitmapFromDiskCache(String key) {
         return DiskCacheSimple.getInstance().isExistFile(key);
     }
 
@@ -115,7 +111,7 @@ public class ImageCache {
     }
 
     public Bitmap getBitmapFromDiskCache(String key, int width, int height, BitmapFactory.Options options) {
-        return DiskCacheSimple.getInstance().get(key, width, height, options); //?
+        return DiskCacheSimple.getInstance().get(key, width, height, options);
     }
 
     //*

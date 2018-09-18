@@ -46,7 +46,7 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
         id++;
 
         mId.setText(id + "");
-        mAvatar.setBackground(null);
+        mAvatar.setImageBitmap(null);
         itemView.setTag(item);
         mLastUrl = id + "";
         final String idTemp = id + "";

@@ -36,13 +36,4 @@ public class MemoryLeakApplication extends Application {
 
 
     }
-
-  /*  private File getDiskCacheDir(String uniqueName) {
-        final String cachePath =
-                Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ?
-                        Objects.requireNonNull(getExternalCacheDir()).getPath() :
-                        getCacheDir().getPath();
-        return new File(cachePath + File.separator + uniqueName);
-    }*/
-
 }

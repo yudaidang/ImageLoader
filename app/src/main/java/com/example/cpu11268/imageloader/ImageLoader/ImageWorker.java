@@ -7,6 +7,8 @@ import android.widget.ImageView;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.CallBackImageView;
 
+import java.lang.ref.WeakReference;
+
 public class ImageWorker {//generic
     public static final int DEFAULT_SIZE_SAMPLE = 0;
 
@@ -14,10 +16,10 @@ public class ImageWorker {//generic
     protected MyDownloadCallback mCallback;
     protected int mWidth;
     protected int mHeight;
-    protected View mView;
+    protected WeakReference<View> mView;
 
     public ImageWorker(String mUrl, ImageView mView) {
-        this.mView = mView;
+        this.mView = new WeakReference<View>(mView);
         this.mCallback = new CallBackImageView(mView);
         this.mUrl = mUrl;
         this.mWidth = (int) (mView.getLayoutParams().width / (Resources.getSystem().getDisplayMetrics().density));

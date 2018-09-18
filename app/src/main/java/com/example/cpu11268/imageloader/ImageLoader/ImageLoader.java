@@ -163,15 +163,15 @@ public class ImageLoader implements Handler.Callback {
         if (imageWorker.mUrl == null) {
             imageWorker.onDownloadComplete(null);
         }
-        if (imageWorker.mView != null) {
-            ImageWorker im = listViewCallback.get(imageWorker.mView.hashCode());
+        if (imageWorker.mView.get() != null) {
+            ImageWorker im = listViewCallback.get(imageWorker.mView.get().hashCode());
             for (Set<ImageWorker> listTemp : listImageWorker.values()) {
                 if (listTemp.contains(im)) {
                     listTemp.remove(im);
-                    listViewCallback.remove(imageWorker.mView.hashCode());
+                    listViewCallback.remove(imageWorker.mView.get().hashCode());
                 }
             }
-            listViewCallback.put(imageWorker.mView.hashCode(), imageWorker);
+            listViewCallback.put(imageWorker.mView.get().hashCode(), imageWorker);
         } else {
             listViewCallback.put(imageWorker.mCallback.hashCode(), imageWorker);
         }
@@ -226,11 +226,10 @@ public class ImageLoader implements Handler.Callback {
                 Set<ImageWorker> list = listImageWorker.get(messageBitmap.getmUrl());
                 if (list != null) {
                     for (ImageWorker im : list) {
-                        if (listViewCallback.containsKey(im.mView)) {
-                            listViewCallback.remove(im.mView);
-                            ((ImageView) im.mView).setImageBitmap(null);
+                        if (listViewCallback.containsKey(im.mView.get())) {
+                            listViewCallback.remove(im.mView.get());
+                            ((ImageView) im.mView.get()).setImageBitmap(null);
                         }
-
                         im.onDownloadComplete(messageBitmap.getmBitmap(), im.mCallback);
                     }
                 }

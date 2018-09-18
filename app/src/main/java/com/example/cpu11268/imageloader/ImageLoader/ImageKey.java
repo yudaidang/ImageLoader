@@ -5,30 +5,23 @@ package com.example.cpu11268.imageloader.ImageLoader;
  */
 public class ImageKey {
     private String mUrl;
-    private int mWidth;
-    private int mHeight;
+    private int mSize;
 
     public ImageKey(String url, int width, int height) {
         mUrl = url;
         int sampleSize = sampleSize(width, height);
-        if (sampleSize <= 0){
-            mWidth = 0;
-            mHeight = 0;
-        }else if(sampleSize <= 64){
-            mWidth = 64;
-            mHeight = 64;
-        }else if(sampleSize <= 128){
-            mWidth = 128;
-            mHeight = 128;
-        }else if(sampleSize <= 256){
-            mWidth = 256;
-            mHeight = 256;
-        }else if(sampleSize <= 512){
-            mWidth = 512;
-            mHeight = 512;
-        }else{
-            mWidth = width;
-            mHeight = height;
+        if (sampleSize <= 0) {
+            mSize = 0;
+        } else if (sampleSize <= 64) {
+            mSize = 64;
+        } else if (sampleSize <= 128) {
+            mSize = 128;
+        } else if (sampleSize <= 256) {
+            mSize = 256;
+        } else if (sampleSize <= 512) {
+            mSize = 512;
+        } else {
+            mSize = width;
         }
     }
 
@@ -40,20 +33,13 @@ public class ImageKey {
         return mUrl;
     }
 
-
-    public int getmWidth() {
-        return mWidth;
+    public int getSize() {
+        return mSize;
     }
-
-
-    public int getmHeight() {
-        return mHeight;
-    }
-
 
     @Override
     public int hashCode() {
-        return (mUrl.hashCode() + sampleSize(mWidth, mHeight));
+        return (mUrl.hashCode() + mSize);
     }
 
     @Override
