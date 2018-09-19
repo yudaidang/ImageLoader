@@ -94,8 +94,12 @@ public class DownloadImageRunnable implements Runnable {
             e.printStackTrace();
         } finally {
             try {
-                inputStream.close();
-                connection.disconnect();
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (connection != null) {
+                    connection.disconnect();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

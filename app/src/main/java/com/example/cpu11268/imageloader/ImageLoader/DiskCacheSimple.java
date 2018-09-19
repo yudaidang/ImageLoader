@@ -164,11 +164,7 @@ public class DiskCacheSimple {
 
     public boolean isExistFile(String key) {
         Entry cachedData = (Entry) mFilesInCache.get(key.hashCode());
-        if (cachedData != null) {
-            return cachedData.file.exists() && cachedData.file.length() != 0;
-        } else {
-            return false;
-        }
+        return cachedData != null && cachedData.file.exists() && cachedData.file.length() != 0;
     }
 
     public synchronized Bitmap get(String key) {
@@ -197,7 +193,7 @@ public class DiskCacheSimple {
         }
         if (value.length != 0) {
             Date d = Calendar.getInstance().getTime();
-            SimpleDateFormat df = new SimpleDateFormat("HHmm_ddMMyyyy");
+            SimpleDateFormat df = new SimpleDateFormat("ddMMyyyy");
             String formattedDate = df.format(d);
             File file = new File(diskCacheDir, formattedDate);
             file.mkdirs();

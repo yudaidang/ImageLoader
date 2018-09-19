@@ -34,7 +34,6 @@ public class ImageKey {
         return mUrl;
     }
 
-
     public int getSize() {
         return mSize;
     }

@@ -217,7 +217,6 @@ public class ImageLoader implements Handler.Callback {
 
     @Override
     public boolean handleMessage(Message msg) {
-        // phải sửa lại
         if (msg.what == DownloadImageRunnable.IMAGE_DOWNLOAD_RESULT_CODE || msg.what == DiskBitmapRunnable.IMAGE_LOADED_FROM_DISK_RESULT_CODE) {
             MessageBitmap messageBitmap = (MessageBitmap) msg.obj;
             if (listImageWorker.containsKey(messageBitmap.getImageKey())) {

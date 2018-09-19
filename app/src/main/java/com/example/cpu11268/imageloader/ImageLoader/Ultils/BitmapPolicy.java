@@ -18,7 +18,6 @@ public class BitmapPolicy {
         try {
             FileOutputStream fl = new FileOutputStream(outputFile);
             buf = new BufferedOutputStream(fl );
-            Log.d("BITMAPPOLICY ", value.length + " "+ outputFile.getAbsolutePath());
             buf.write(value);
         }catch(Exception ex){
             Log.e("LOGLOG", ex.getMessage());
