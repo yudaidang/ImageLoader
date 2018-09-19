@@ -11,8 +11,8 @@
         android:layout_height="match_parent"/>
     <ImageView
         android:id="@+id/imageAvatar"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:scaleType="fitXY"
         android:padding="10dp" />
     <LinearLayout

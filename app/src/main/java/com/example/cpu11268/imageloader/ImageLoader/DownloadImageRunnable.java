@@ -27,24 +27,22 @@ public class DownloadImageRunnable implements Runnable {
             3, 60L,
             TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private final BitmapFactory.Options options = new BitmapFactory.Options();
-    private String imgUrl;
     private Handler mHandler;
-    private int width;
-    private int height;
     private boolean mMaxSize;
-    public DownloadImageRunnable(String imgUrl, Handler mHandler, int width, int height) {
-        this.imgUrl = imgUrl;
+    private ImageKey imageKey;
+
+    public DownloadImageRunnable(ImageKey imageKey, Handler mHandler) {
+        this.imageKey = imageKey;
         this.mHandler = mHandler;
-        this.width = width;
-        this.height = height;
     }
 
     @Override
     public void run() {
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        Bitmap bitmap = downloadImage(imgUrl);
-        MessageBitmap messageBitmap = new MessageBitmap(imgUrl, bitmap, mMaxSize);
+        Bitmap bitmap = downloadImage(imageKey.getmUrl());
+
+        MessageBitmap messageBitmap = new MessageBitmap(imageKey, bitmap, mMaxSize);
         Message message = mHandler.obtainMessage(IMAGE_DOWNLOAD_RESULT_CODE, messageBitmap);
         message.sendToTarget();
     }
@@ -71,21 +69,26 @@ public class DownloadImageRunnable implements Runnable {
             AddImageRunnable addImageRunnable = new AddImageRunnable(imgUrl, bytes);
             mExecutor.execute(addImageRunnable);
 
-            if (width != ImageWorker.DEFAULT_SIZE_SAMPLE || height != ImageWorker.DEFAULT_SIZE_SAMPLE) {
+            if (imageKey.getSize() != ImageWorker.DEFAULT_SIZE_SAMPLE) {
                 options.inJustDecodeBounds = true;
                 BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-                options.inSampleSize = caculateInSampleSize(options, width, height);
+                options.inSampleSize = caculateInSampleSize(options, imageKey.getSize(), imageKey.getSize());
                 options.inMutable = true;
                 options.inJustDecodeBounds = false;
             }
             int mTempWidth = options.outWidth;
             int mTempHeight = options.outHeight;
-            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-            ImageCache.getInstance().addBitmapToMemoryCacheTotal(new ImageKey(imgUrl, width, height), new ValueBitmapMemCache(bitmap, mMaxSize)); //?
 
+
+
+            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+            int msize = imageKey.getSize();
             if (mTempWidth == bitmap.getWidth() && mTempHeight == bitmap.getHeight()) {
                 this.mMaxSize = true;
+                msize = 0;
             }
+
+            ImageCache.getInstance().addBitmapToMemoryCacheTotal(new ImageKey(imageKey.getmUrl(), msize, msize), new ValueBitmapMemCache(bitmap, mMaxSize)); //?
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -103,6 +106,7 @@ public class DownloadImageRunnable implements Runnable {
 
 
     private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {
+
         int inSampleSize = 1;
         while (((options.outHeight / 2) / inSampleSize) >= heightReq && ((options.outWidth / 2) / inSampleSize) >= widthReq) {
             inSampleSize *= 2;

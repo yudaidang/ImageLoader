@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
-import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkChecker;
@@ -21,19 +20,14 @@ public class DiskBitmapRunnable implements Runnable {
     private Executor executorInternet;
     private final WeakReference<Context> mContext;
     private final BitmapFactory.Options options = new BitmapFactory.Options();
-    private String imgUrl;
     private Handler mHandler;
-    private int width;
-    private int height;
+    private ImageKey imageKey;
 
-    public DiskBitmapRunnable(Executor executorInternet, Context context, String imgUrl, Handler mHandler, int width, int height) {
-        this.imgUrl = imgUrl;
+    public DiskBitmapRunnable(Executor executorInternet, Context context, ImageKey imageKey, Handler mHandler) {
         this.mHandler = mHandler;
-        this.width = width;
-        this.height = height;
         this.mContext = new WeakReference<>(context);
         this.executorInternet = executorInternet;
-
+        this.imageKey = imageKey;
     }
 
     @Override
@@ -43,31 +37,27 @@ public class DiskBitmapRunnable implements Runnable {
         Bitmap bitmap;
 
         boolean mMaxSize = false;
-        if (ImageCache.getInstance().isBitmapFromDiskCache(imgUrl)) {
-            if (width == ImageWorker.DEFAULT_SIZE_SAMPLE || height == ImageWorker.DEFAULT_SIZE_SAMPLE) {
-                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imgUrl);
+        if (ImageCache.getInstance().isBitmapFromDiskCache(imageKey.getmUrl())) {
+            if (imageKey.getSize() == ImageWorker.DEFAULT_SIZE_SAMPLE) {
+                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imageKey.getmUrl());
                 mMaxSize = true;
             } else {
-                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imgUrl, width, height, options);
+                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imageKey.getmUrl(), imageKey.getSize(), imageKey.getSize(), options);
             }
-            if (mMaxSize && width == 0 && height == 0) {
-                width = bitmap.getWidth();
-                height = bitmap.getHeight();
-            }
-            ImageCache.getInstance().addBitmapToMemoryCacheTotal(new ImageKey(imgUrl, width, height), new ValueBitmapMemCache(bitmap, mMaxSize)); //?
-            handleResult(imgUrl, bitmap);
+            ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
+            handleResult(imageKey, bitmap);
         } else {
             if (mContext.get() != null && NetworkChecker.isOnline(mContext.get())) {
-                DownloadImageRunnable downloadImageRunnable = new DownloadImageRunnable(imgUrl, mHandler, width, height);
+                DownloadImageRunnable downloadImageRunnable = new DownloadImageRunnable(imageKey, mHandler);
                 executorInternet.execute(downloadImageRunnable);
             } else {
-                handleResult(imgUrl, null);
+                handleResult(imageKey, null);
             }
         }
     }
 
-    private void handleResult(String url, Bitmap bitmap) {
-        MessageBitmap messageBitmap = new MessageBitmap(url, bitmap, false);
+    private void handleResult(ImageKey imageKey, Bitmap bitmap) {
+        MessageBitmap messageBitmap = new MessageBitmap(imageKey, bitmap, false);
         Message message = mHandler.obtainMessage(IMAGE_LOADED_FROM_DISK_RESULT_CODE, messageBitmap);
         message.sendToTarget();
     }

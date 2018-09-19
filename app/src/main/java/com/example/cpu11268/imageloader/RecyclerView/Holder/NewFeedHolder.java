@@ -69,7 +69,6 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
 
             imageWorker.setWidthHeight(40, 40);*/
             ImageLoader.getInstance().loadImageWorker(mContext, imageWorker);
-
             mName.setText(item.getmNewFeed().getmName());
 
         }

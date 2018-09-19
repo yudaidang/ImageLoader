@@ -29,7 +29,7 @@ public class ImageLoader implements Handler.Callback {
     private final Handler mHandler;
     private Executor executor;
 
-    private HashMap<String, Set<ImageWorker>> listImageWorker = new HashMap<>();
+    private HashMap<ImageKey, Set<ImageWorker>> listImageWorker = new HashMap<>();
     private HashMap<Integer, ImageWorker> listViewCallback
             = new HashMap<>();
 
@@ -175,22 +175,20 @@ public class ImageLoader implements Handler.Callback {
         } else {
             listViewCallback.put(imageWorker.mCallback.hashCode(), imageWorker);
         }
-
         bitmap = ImageCache.getInstance().findBitmapCache(imageWorker.mUrl, imageWorker.mWidth, imageWorker.mHeight);
         if (bitmap == null) {
             Set<ImageWorker> list;
-
-            if (listImageWorker.containsKey(imageWorker.mUrl)) {
-                list = listImageWorker.get(imageWorker.mUrl);
+            ImageKey imagekey = new ImageKey(imageWorker.mUrl, imageWorker.mWidth, imageWorker.mHeight);
+            if (listImageWorker.containsKey(imagekey)) {
+                list = listImageWorker.get(imagekey);
             } else {
                 list = new HashSet<>();
                 DiskBitmapRunnable diskBitmapRunnable = new DiskBitmapRunnable(executorInternet, context,
-                        imageWorker.mUrl, mHandler, imageWorker.mWidth, imageWorker.mHeight);
+                        imagekey, mHandler);
                 executor.execute(diskBitmapRunnable);
             }
-
             list.add(imageWorker);
-            listImageWorker.put(imageWorker.mUrl, list);
+            listImageWorker.put(new ImageKey(imageWorker.mUrl, imageWorker.mWidth, imageWorker.mHeight), list);
         } else {
             imageWorker.onDownloadComplete(bitmap, imageWorker.mCallback);
         }
@@ -219,11 +217,11 @@ public class ImageLoader implements Handler.Callback {
 
     @Override
     public boolean handleMessage(Message msg) {
-
+        // phải sửa lại
         if (msg.what == DownloadImageRunnable.IMAGE_DOWNLOAD_RESULT_CODE || msg.what == DiskBitmapRunnable.IMAGE_LOADED_FROM_DISK_RESULT_CODE) {
             MessageBitmap messageBitmap = (MessageBitmap) msg.obj;
-            if (listImageWorker.containsKey(messageBitmap.getmUrl())) {
-                Set<ImageWorker> list = listImageWorker.get(messageBitmap.getmUrl());
+            if (listImageWorker.containsKey(messageBitmap.getImageKey())) {
+                Set<ImageWorker> list = listImageWorker.get(messageBitmap.getImageKey());
                 if (list != null) {
                     for (ImageWorker im : list) {
                         if (listViewCallback.containsKey(im.mView.get())) {
@@ -233,7 +231,7 @@ public class ImageLoader implements Handler.Callback {
                         im.onDownloadComplete(messageBitmap.getmBitmap(), im.mCallback);
                     }
                 }
-                listImageWorker.remove(messageBitmap.getmUrl());
+                listImageWorker.remove(messageBitmap.getImageKey());
             }
         }
         return true;

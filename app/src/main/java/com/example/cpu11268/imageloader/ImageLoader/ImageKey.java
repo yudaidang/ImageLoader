@@ -7,6 +7,7 @@ public class ImageKey {
     private String mUrl;
     private int mSize;
 
+
     public ImageKey(String url, int width, int height) {
         mUrl = url;
         int sampleSize = sampleSize(width, height);
@@ -33,8 +34,13 @@ public class ImageKey {
         return mUrl;
     }
 
+
     public int getSize() {
         return mSize;
+    }
+
+    public void setSize(int mSize) {
+        this.mSize = mSize;
     }
 
     @Override
@@ -46,4 +52,5 @@ public class ImageKey {
     public boolean equals(Object obj) {
         return obj != null && obj.hashCode() == this.hashCode();
     }
+
 }

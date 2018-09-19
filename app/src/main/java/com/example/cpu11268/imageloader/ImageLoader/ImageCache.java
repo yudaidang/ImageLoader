@@ -4,14 +4,19 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.LruCache;
 
+import java.util.HashSet;
+
 public class ImageCache {
     public static final int DEFAULT_MAX_SIZE = 66000;
+    private static final int MAX_SIZE = 0;
     private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCache;
     private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCacheLarge;
     private static ImageCache sInstance = new ImageCache();
-
     private int maxMemory = (int) Runtime.getRuntime().maxMemory();
     private int cacheSize = maxMemory / 8;
+
+    private HashSet<ImageKey> mListMaxSize = new HashSet<>();
+
 
     private ImageCache() {
 
@@ -48,7 +53,19 @@ public class ImageCache {
     public synchronized void addBitmapToMemoryCacheTotal(ImageKey key, ValueBitmapMemCache bitmap) {
         if (bitmap == null)
             return;
-        if (key.getSize() * key.getSize() > DEFAULT_MAX_SIZE) {
+        int mWidth = key.getSize();
+        int mHeight = key.getSize();
+
+        if (bitmap.isMaxSize()) {
+            if (key.getSize() == MAX_SIZE) {
+                mWidth = bitmap.getBitmap().getWidth();
+                mHeight = bitmap.getBitmap().getHeight();
+                mListMaxSize.add(new ImageKey(key.getmUrl(), mWidth, mHeight));
+            } else {
+                key.setSize(MAX_SIZE);
+            }
+        }
+        if (mWidth * mHeight > DEFAULT_MAX_SIZE) {
             addBitmapToMemoryLargeCache(key, bitmap);
         } else {
             addBitmapToMemoryCache(key, bitmap);
@@ -59,6 +76,9 @@ public class ImageCache {
 
     public Bitmap findBitmapCache(String url, int width, int height) {
         ImageKey imageKey = new ImageKey(url, width, height);
+        if (mListMaxSize.contains(imageKey)) {
+            imageKey = new ImageKey(url, MAX_SIZE, MAX_SIZE);
+        }
         if (isBitmapFromMemoryCache(imageKey)) {
             return getBitmapFromCache(mMemoryCache, imageKey).getBitmap();
         } else if (isBitmapFromMemoryLargeCache(imageKey)) {
@@ -82,7 +102,7 @@ public class ImageCache {
     }
 
     private boolean isBitmapFromMemoryCache(ImageKey key) { //?
-        return mMemoryCache.snapshot().containsKey(key);
+        return mMemoryCache.snapshot().containsKey(key) || mListMaxSize.contains(key);
     }
 
     private void addBitmapToMemoryLargeCache(ImageKey key, ValueBitmapMemCache bitmap) { //?
@@ -92,7 +112,7 @@ public class ImageCache {
     }
 
     private boolean isBitmapFromMemoryLargeCache(ImageKey key) { //?
-        return mMemoryCacheLarge.snapshot().containsKey(key);
+        return mMemoryCacheLarge.snapshot().containsKey(key) || mListMaxSize.contains(key);
     }
 
     // Disk Cache

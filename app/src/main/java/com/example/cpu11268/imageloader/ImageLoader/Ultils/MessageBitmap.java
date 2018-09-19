@@ -2,16 +2,18 @@ package com.example.cpu11268.imageloader.ImageLoader.Ultils;
 
 import android.graphics.Bitmap;
 
+import com.example.cpu11268.imageloader.ImageLoader.ImageKey;
+
 public class MessageBitmap {
     private Bitmap mBitmap;
-    private String mUrl;
+    private ImageKey imageKey;
     private boolean mMaxSize;
     private String id;
 
-    public MessageBitmap(String mUrl, Bitmap mBitmap, boolean mMaxSize) {
+    public MessageBitmap(ImageKey imageKey, Bitmap mBitmap, boolean mMaxSize) {
         this.mMaxSize = mMaxSize;
         this.mBitmap = mBitmap;
-        this.mUrl = mUrl;
+        this.imageKey = imageKey;
     }
 
     public void setId(String id) {
@@ -26,8 +28,8 @@ public class MessageBitmap {
         return mBitmap;
     }
 
-    public String getmUrl() {
-        return mUrl;
+    public ImageKey getImageKey() {
+        return imageKey;
     }
 
     public boolean ismMaxSize() {
