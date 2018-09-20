@@ -30,8 +30,7 @@ public class ImageLoader implements Handler.Callback {
     private Executor executor;
 
     private HashMap<ImageKey, Set<ImageWorker>> listImageWorker = new HashMap<>();
-    private HashMap<Integer, ImageWorker> listViewCallback
-            = new HashMap<>();
+    private HashMap<Integer, ImageWorker> listViewCallback = new HashMap<>();
 
     public ImageLoader() {
 

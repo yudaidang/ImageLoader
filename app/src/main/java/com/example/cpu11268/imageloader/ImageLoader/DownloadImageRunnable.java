@@ -69,26 +69,20 @@ public class DownloadImageRunnable implements Runnable {
             AddImageRunnable addImageRunnable = new AddImageRunnable(imgUrl, bytes);
             mExecutor.execute(addImageRunnable);
 
-            if (imageKey.getSize() != ImageWorker.DEFAULT_SIZE_SAMPLE) {
+            if (imageKey.getSize() != ImageWorker.DEFAULT_MAX_SIZE) {
                 options.inJustDecodeBounds = true;
                 BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
                 options.inSampleSize = caculateInSampleSize(options, imageKey.getSize(), imageKey.getSize());
                 options.inMutable = true;
                 options.inJustDecodeBounds = false;
             }
-            int mTempWidth = options.outWidth;
-            int mTempHeight = options.outHeight;
-
-
 
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-            int msize = imageKey.getSize();
-            if (mTempWidth == bitmap.getWidth() && mTempHeight == bitmap.getHeight()) {
+            if (options.outWidth == bitmap.getWidth() && options.outHeight == bitmap.getHeight()) {
                 this.mMaxSize = true;
-                msize = 0;
             }
 
-            ImageCache.getInstance().addBitmapToMemoryCacheTotal(new ImageKey(imageKey.getmUrl(), msize, msize), new ValueBitmapMemCache(bitmap, mMaxSize)); //?
+            ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,10 +98,8 @@ public class DownloadImageRunnable implements Runnable {
                 e.printStackTrace();
             }
         }
-
         return bitmap;
     }
-
 
     private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {
 

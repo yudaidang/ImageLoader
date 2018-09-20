@@ -31,6 +31,7 @@ public class BitmapPolicy {
         }
     }
 
+
     public Bitmap read(File inputFile, int width, int height, BitmapFactory.Options options) {
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(inputFile.getAbsolutePath(), options);

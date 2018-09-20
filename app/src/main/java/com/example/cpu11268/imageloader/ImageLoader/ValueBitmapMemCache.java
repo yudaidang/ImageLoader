@@ -11,7 +11,6 @@ public class ValueBitmapMemCache {
         this.mMaxSize = mMaxSize;
     }
 
-
     public boolean isMaxSize() {
         return mMaxSize;
     }

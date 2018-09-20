@@ -10,7 +10,7 @@ import com.example.cpu11268.imageloader.ImageLoader.Ultils.CallBackImageView;
 import java.lang.ref.WeakReference;
 
 public class ImageWorker {//generic
-    public static final int DEFAULT_SIZE_SAMPLE = 0;
+    public static final int DEFAULT_MAX_SIZE = 0;
 
     protected String mUrl;
     protected MyDownloadCallback mCallback;
