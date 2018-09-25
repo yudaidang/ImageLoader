@@ -57,7 +57,7 @@ public class DiskCacheSimple {
                 File filesChild[] = fl.listFiles();
                 allFolder.add(fl);
                 for (File flc : filesChild) {
-                    if (fl.isFile()) {
+                    if (flc.isFile()) {
                         long length = flc.length();
                         String hashedValue = flc.getName();
                         Entry entry = new Entry(flc, length, Integer.parseInt(hashedValue), Integer.parseInt(flc.getName()));

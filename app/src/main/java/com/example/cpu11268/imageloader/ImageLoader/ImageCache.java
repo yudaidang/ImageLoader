@@ -10,7 +10,7 @@ public class ImageCache {
     public static final int DEFAULT_MAX_SIZE = 66000;
     private static final int MAX_SIZE = 0;
     private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCache;
-    private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCacheLarge;
+                private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCacheLarge;
     private static ImageCache sInstance = new ImageCache();
     private int maxMemory = (int) Runtime.getRuntime().maxMemory();
     private int cacheSize = maxMemory / 8;

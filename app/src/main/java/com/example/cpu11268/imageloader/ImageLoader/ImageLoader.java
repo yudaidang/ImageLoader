@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
@@ -28,9 +29,15 @@ public class ImageLoader implements Handler.Callback {
     private static Executor executorInternet;
     private final Handler mHandler;
     private Executor executor;
+//    public static final int DEFAULT_MAX_SIZE = 0;
+//    protected int mWidth = DEFAULT_MAX_SIZE;
+//    protected int mHeight = DEFAULT_MAX_SIZE;
+
 
     private HashMap<ImageKey, Set<ImageWorker>> listImageWorker = new HashMap<>();
     private HashMap<Integer, ImageWorker> listViewCallback = new HashMap<>();
+
+//    private HashSet<ImageKey> listKey = new HashSet<>();
 
     public ImageLoader() {
 
@@ -148,6 +155,60 @@ public class ImageLoader implements Handler.Callback {
         return sInstance;
     }
 
+/*
+    public void loadImageWorker(Context context, String mUrl) {
+
+        ImageKey imageKey = new ImageKey(mUrl, mWidth, mHeight);
+
+        if(listKey.contains(imageKey)){
+            ImageWorker imageWorker = new ImageWorker();
+        }
+
+        if (DiskCacheSimple.getInstance().getDiskCacheDir() == null) {
+            File diskCacheDir = getDiskCacheDir(context.getApplicationContext(), "IMAGE");
+            if (!diskCacheDir.exists()) {
+                diskCacheDir.mkdirs();
+            }
+            DiskCacheSimple.getInstance().setListFile(diskCacheDir);
+        }
+
+        Bitmap bitmap;
+
+        if (imageWorker.mUrl == null) {
+            imageWorker.onDownloadComplete(null);
+        }
+        if (imageWorker.mView.get() != null) {
+            ImageWorker im = listViewCallback.get(imageWorker.mView.get().hashCode());
+            for (Set<ImageWorker> listTemp : listImageWorker.values()) {
+                if (listTemp.contains(im)) {
+                    listTemp.remove(im);
+                    listViewCallback.remove(imageWorker.mView.get().hashCode());
+                }
+            }
+            listViewCallback.put(imageWorker.mView.get().hashCode(), imageWorker);
+        } else {
+            listViewCallback.put(imageWorker.mCallback.hashCode(), imageWorker);
+        }
+        bitmap = ImageCache.getInstance().findBitmapCache(imageWorker.mUrl, imageWorker.mWidth, imageWorker.mHeight);
+        if (bitmap == null) {
+            Set<ImageWorker> list;
+            ImageKey imagekey = new ImageKey(imageWorker.mUrl, imageWorker.mWidth, imageWorker.mHeight);
+            if (listImageWorker.containsKey(imagekey)) {
+                list = listImageWorker.get(imagekey);
+            } else {
+                list = new HashSet<>();
+                DiskBitmapRunnable diskBitmapRunnable = new DiskBitmapRunnable(executorInternet, context,
+                        imagekey, mHandler);
+                executor.execute(diskBitmapRunnable);
+            }
+            list.add(imageWorker);
+            listImageWorker.put(imagekey, list);
+        } else {
+            imageWorker.onDownloadComplete(bitmap, imageWorker.mCallback);
+        }
+    }
+*/
+
     public void loadImageWorker(Context context, ImageWorker imageWorker) {
         if (DiskCacheSimple.getInstance().getDiskCacheDir() == null) {
             File diskCacheDir = getDiskCacheDir(context.getApplicationContext(), "IMAGE");
@@ -187,7 +248,7 @@ public class ImageLoader implements Handler.Callback {
                 executor.execute(diskBitmapRunnable);
             }
             list.add(imageWorker);
-            listImageWorker.put(new ImageKey(imageWorker.mUrl, imageWorker.mWidth, imageWorker.mHeight), list);
+            listImageWorker.put(imagekey, list);
         } else {
             imageWorker.onDownloadComplete(bitmap, imageWorker.mCallback);
         }
@@ -216,8 +277,9 @@ public class ImageLoader implements Handler.Callback {
 
     @Override
     public boolean handleMessage(Message msg) {
-        if (msg.what == DownloadImageRunnable.IMAGE_DOWNLOAD_RESULT_CODE || msg.what == DiskBitmapRunnable.IMAGE_LOADED_FROM_DISK_RESULT_CODE) {
+        if ( msg.what == DiskBitmapRunnable.IMAGE_LOADED_FROM_DISK_RESULT_CODE) {
             MessageBitmap messageBitmap = (MessageBitmap) msg.obj;
+
             if (listImageWorker.containsKey(messageBitmap.getImageKey())) {
                 Set<ImageWorker> list = listImageWorker.get(messageBitmap.getImageKey());
                 if (list != null) {

@@ -29,7 +29,7 @@ public class MessageBitmap {
     }
 
     public ImageKey getImageKey() {
-        return imageKey;
+         return imageKey;
     }
 
     public boolean ismMaxSize() {

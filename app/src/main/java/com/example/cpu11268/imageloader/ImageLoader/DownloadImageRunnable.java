@@ -7,6 +7,7 @@ import android.os.Message;
 import android.os.Process;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.AddImageRunnable;
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.DataDownload;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
 
 import org.apache.commons.io.IOUtils;
@@ -26,33 +27,29 @@ public class DownloadImageRunnable implements Runnable {
     private static Executor mExecutor = new ThreadPoolExecutor(2,
             3, 60L,
             TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-    private final BitmapFactory.Options options = new BitmapFactory.Options();
     private Handler mHandler;
-    private boolean mMaxSize;
-    private ImageKey imageKey;
+    private String mUrl;
 
-    public DownloadImageRunnable(ImageKey imageKey, Handler mHandler) {
-        this.imageKey = imageKey;
+    public DownloadImageRunnable(String mUrl, Handler mHandler) {
+        this.mUrl = mUrl;
         this.mHandler = mHandler;
     }
 
+
     @Override
     public void run() {
-
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        Bitmap bitmap = downloadImage(imageKey.getmUrl());
-
-        MessageBitmap messageBitmap = new MessageBitmap(imageKey, bitmap, mMaxSize);
-        Message message = mHandler.obtainMessage(IMAGE_DOWNLOAD_RESULT_CODE, messageBitmap);
+        byte[] bytes = downloadImage(mUrl);
+        DataDownload data = new DataDownload(mUrl, bytes);
+        Message message = mHandler.obtainMessage(IMAGE_DOWNLOAD_RESULT_CODE, data);
         message.sendToTarget();
     }
 
-    private Bitmap downloadImage(String imgUrl) {
-        Bitmap bitmap = null;
+    private byte[] downloadImage(String imgUrl) {
         InputStream inputStream = null;
         HttpURLConnection connection = null;
 
-        byte[] bytes;
+        byte[] bytes = new byte[0];
         try {
             URL url = new URL(imgUrl);
             //connection
@@ -69,21 +66,6 @@ public class DownloadImageRunnable implements Runnable {
             AddImageRunnable addImageRunnable = new AddImageRunnable(imgUrl, bytes);
             mExecutor.execute(addImageRunnable);
 
-            if (imageKey.getSize() != ImageWorker.DEFAULT_MAX_SIZE) {
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-                options.inSampleSize = caculateInSampleSize(options, imageKey.getSize(), imageKey.getSize());
-                options.inMutable = true;
-                options.inJustDecodeBounds = false;
-            }
-
-            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-            if (options.outWidth == bitmap.getWidth() && options.outHeight == bitmap.getHeight()) {
-                this.mMaxSize = true;
-            }
-
-            ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -98,16 +80,6 @@ public class DownloadImageRunnable implements Runnable {
                 e.printStackTrace();
             }
         }
-        return bitmap;
+        return bytes;
     }
-
-    private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {
-
-        int inSampleSize = 1;
-        while (((options.outHeight / 2) / inSampleSize) >= heightReq && ((options.outWidth / 2) / inSampleSize) >= widthReq) {
-            inSampleSize *= 2;
-        }
-        return inSampleSize;
-    }
-
 }

@@ -66,7 +66,6 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
 
             ImageWorker imageWorker = new ImageWorker(item.getmNewFeed().getmUrlImage(), mAvatar);
 /*            ImageWorker imageWorker = new ImageWorker(item.getmNewFeed().getmUrlImage(), img);
-
             imageWorker.setWidthHeight(40, 40);*/
             ImageLoader.getInstance().loadImageWorker(mContext, imageWorker);
             mName.setText(item.getmNewFeed().getmName());
