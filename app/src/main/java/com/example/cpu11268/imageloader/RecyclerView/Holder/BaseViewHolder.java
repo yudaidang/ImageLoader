@@ -16,4 +16,8 @@ public class BaseViewHolder<T extends BaseViewItem> extends RecyclerView.ViewHol
     public void onRecycled() {
 
     }
+
+    public void onDetachView(){
+
+    }
 }

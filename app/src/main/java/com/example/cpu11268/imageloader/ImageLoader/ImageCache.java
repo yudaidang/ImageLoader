@@ -74,10 +74,9 @@ public class ImageCache {
 
     //*
 
-    public Bitmap findBitmapCache(String url, int width, int height) {
-        ImageKey imageKey = new ImageKey(url, width, height);
+    public Bitmap findBitmapCache(ImageKey imageKey) {
         if (mListMaxSize.contains(imageKey)) {
-            imageKey = new ImageKey(url, MAX_SIZE, MAX_SIZE);
+            imageKey = new ImageKey(imageKey.getmUrl(), MAX_SIZE, MAX_SIZE);
         }
         if (isBitmapFromMemoryCache(imageKey)) {
             return getBitmapFromCache(mMemoryCache, imageKey).getBitmap();

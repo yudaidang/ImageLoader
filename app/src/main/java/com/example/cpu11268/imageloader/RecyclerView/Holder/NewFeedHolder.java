@@ -28,7 +28,6 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     public TextView mId;
     String mLastUrl;
     private Context mContext;
-    private HashMap<Integer, ImageWorker.MyDownloadCallback> listView = new HashMap<>();
 
     public NewFeedHolder(View itemView, Context context) {
         super(itemView);
@@ -64,10 +63,10 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
             }
             listView.put(mAvatar.hashCode(), img);*/
 
-            ImageWorker imageWorker = new ImageWorker(item.getmNewFeed().getmUrlImage(), mAvatar);
+//            ImageWorker imageWorker = new ImageWorker(item.getmNewFeed().getmUrlImage(), mAvatar);
 /*            ImageWorker imageWorker = new ImageWorker(item.getmNewFeed().getmUrlImage(), img);
             imageWorker.setWidthHeight(40, 40);*/
-            ImageLoader.getInstance().loadImageWorker(mContext, imageWorker);
+            ImageLoader.getInstance().loadImageWorker(mContext, item.getmNewFeed().getmUrlImage(), mAvatar);
             mName.setText(item.getmNewFeed().getmName());
 
         }
@@ -76,5 +75,14 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     @Override
     public void onRecycled() {
         super.onRecycled();
+//        ImageLoader.getInstance().clearView(mAvatar);
+    }
+
+    @Override
+    public void onDetachView() {
+        super.onDetachView();
+        ImageLoader.getInstance().clearTaskQueue(mAvatar);
+        Log.d("onDetachView ", "DETACH ");
+
     }
 }

@@ -31,7 +31,15 @@ public class BaseViewAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public void onViewRecycled(@NonNull BaseViewHolder holder) {
         super.onViewRecycled(holder);
+        holder.onRecycled();
         Log.d("YUDAIDANGOVR ", "onViewRecycled " + ((NewFeedHolder) holder).mAvatar);
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull BaseViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        holder.onDetachView();
+
     }
 
     @NonNull

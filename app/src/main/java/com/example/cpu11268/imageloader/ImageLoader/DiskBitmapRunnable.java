@@ -22,16 +22,14 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
     private final WeakReference<Context> mContext;
     private final BitmapFactory.Options options = new BitmapFactory.Options();
     private final Handler mHandlerDownload;
-    private Executor executorInternet;
-    private Handler mHandler;
-    private ImageKey imageKey;
-    private HashMap<String, HashSet<ImageKey>> listDownloading = new HashMap<>();
+//    private ImageKey imageKey;
+    private ImageWorker imageWorker;
+    private HashMap<String, HashSet<ImageWorker>> listDownloading = new HashMap<>();
 
-    public DiskBitmapRunnable(Executor executorInternet, Context context, ImageKey imageKey, Handler mHandler) {
-        this.mHandler = mHandler;
+
+    public DiskBitmapRunnable(Context context, ImageWorker imageWorker) {
         this.mContext = new WeakReference<>(context);
-        this.executorInternet = executorInternet;
-        this.imageKey = imageKey;
+        this.imageWorker = imageWorker;
         mHandlerDownload = new Handler(this);
     }
 
@@ -42,37 +40,38 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
         Bitmap bitmap;
 
         boolean mMaxSize = false;
-        if (ImageCache.getInstance().isBitmapFromDiskCache(imageKey.getmUrl())) {
-            if (imageKey.getSize() == ImageWorker.DEFAULT_MAX_SIZE) {
-                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imageKey.getmUrl());
+        if (ImageCache.getInstance().isBitmapFromDiskCache(imageWorker.imageKey.getmUrl())) {
+            if (imageWorker.imageKey.getSize() == ImageWorker.DEFAULT_MAX_SIZE) {
+                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imageWorker.imageKey.getmUrl());
                 mMaxSize = true;
             } else {
-                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imageKey.getmUrl(), imageKey.getSize(), imageKey.getSize(), options);
+                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(imageWorker.imageKey.getmUrl(), imageWorker.imageKey.getSize(), imageWorker.imageKey.getSize(), options);
             }
-            ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
-            handleResult(imageKey, bitmap);
+            ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageWorker.imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
+            handleResult(imageWorker.imageKey, bitmap);
         } else {
             if (mContext.get() != null && NetworkChecker.isOnline(mContext.get())) {
-                HashSet<ImageKey> list;
-                if (!listDownloading.containsKey(imageKey.getmUrl())) {
+                HashSet<ImageWorker> list;
+                if (!listDownloading.containsKey(imageWorker.imageKey.getmUrl())) {
                     list = new HashSet<>();
-                    DownloadImageRunnable downloadImageRunnable = new DownloadImageRunnable(imageKey.getmUrl(), mHandlerDownload);
-                    executorInternet.execute(downloadImageRunnable);
+                    DownloadImageRunnable downloadImageRunnable = new DownloadImageRunnable(imageWorker.imageKey.getmUrl(), mHandlerDownload);
+                    ImageLoader.getInstance().executorInternet.execute(downloadImageRunnable);
+
                 } else {
-                    list = listDownloading.get(imageKey.getmUrl());
+                    list = listDownloading.get(imageWorker.imageKey.getmUrl());
                 }
-                list.add(imageKey);
-                listDownloading.put(imageKey.getmUrl(), list);
+                list.add(imageWorker);
+                listDownloading.put(imageWorker.imageKey.getmUrl(), list);
 
             } else {
-                handleResult(imageKey, null);
+                handleResult(imageWorker.imageKey, null);
             }
         }
     }
 
     private void handleResult(ImageKey imageKey, Bitmap bitmap) {
         MessageBitmap messageBitmap = new MessageBitmap(imageKey, bitmap, false);
-        Message message = mHandler.obtainMessage(IMAGE_LOADED_FROM_DISK_RESULT_CODE, messageBitmap);
+        Message message = ImageLoader.getInstance().mHandler.obtainMessage(IMAGE_LOADED_FROM_DISK_RESULT_CODE, messageBitmap);
         message.sendToTarget();
     }
 
@@ -80,23 +79,11 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
     public boolean handleMessage(Message msg) {
         if (msg.what == DownloadImageRunnable.IMAGE_DOWNLOAD_RESULT_CODE) {
             DataDownload data = (DataDownload) msg.obj;
-            boolean mMaxSize = false;
             if (listDownloading.containsKey(data.getmUrl())) {
-                Set<ImageKey> list = listDownloading.get(data.getmUrl());
+                Set<ImageWorker> list = listDownloading.get(data.getmUrl());
                 if (list != null) {
-                    for (ImageKey ik : list) {
-                        options.inJustDecodeBounds = true;
-                        BitmapFactory.decodeByteArray(data.getBytes(), 0, data.getBytes().length, options);
-                        options.inSampleSize = caculateInSampleSize(options, ik.getSize(), ik.getSize());
-                        int width = options.outWidth;
-                        int height = options.outHeight;
-                        options.inJustDecodeBounds = false;
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(data.getBytes(), 0, data.getBytes().length, options);
-                        handleResult(ik, bitmap);
-                        if (width == bitmap.getWidth() && height == bitmap.getHeight()) {
-                            mMaxSize = true;
-                        }
-                        ImageCache.getInstance().addBitmapToMemoryCacheTotal(ik, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
+                    for (ImageWorker ik : list) {
+                        ik.setImageBitmap(data.getBytes(), options);
                     }
                 }
                 listDownloading.remove(data.getmUrl());
@@ -105,12 +92,5 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
         return false;
     }
 
-    private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {
 
-        int inSampleSize = 1;
-        while (((options.outHeight / 2) / inSampleSize) >= heightReq && ((options.outWidth / 2) / inSampleSize) >= widthReq) {
-            inSampleSize *= 2;
-        }
-        return inSampleSize;
-    }
 }

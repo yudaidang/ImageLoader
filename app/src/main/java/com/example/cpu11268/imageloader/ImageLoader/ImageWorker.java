@@ -1,54 +1,55 @@
 package com.example.cpu11268.imageloader.ImageLoader;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.view.View;
-import android.widget.ImageView;
+import android.graphics.BitmapFactory;
 
-import com.example.cpu11268.imageloader.ImageLoader.Ultils.CallBackImageView;
-
-import java.lang.ref.WeakReference;
+import java.util.HashSet;
 
 public class ImageWorker {//generic
     public static final int DEFAULT_MAX_SIZE = 0;
 
-    protected String mUrl;
-    protected MyDownloadCallback mCallback;
-    protected int mWidth;
-    protected int mHeight;
-    protected WeakReference<View> mView;
+    protected ImageKey imageKey;
 
-    public ImageWorker(String mUrl, ImageView mView) {
-        this.mView = new WeakReference<View>(mView);
-        this.mCallback = new CallBackImageView(mView);
-        this.mUrl = mUrl;
-        this.mWidth = (int) (mView.getLayoutParams().width / (Resources.getSystem().getDisplayMetrics().density));
-        this.mHeight = (int) (mView.getLayoutParams().height / (Resources.getSystem().getDisplayMetrics().density));
-    }
+    public HashSet<MyDownloadCallback> listCallback = new HashSet<>();
 
-    public ImageWorker(String mUrl, MyDownloadCallback callback) {
-        this.mUrl = mUrl;
-        this.mCallback = callback;
-    }
-
-    public void setWidthHeight(int mWidth, int mHeight) {
-        this.mWidth = mWidth;
-        this.mHeight = mHeight;
+    public ImageWorker(ImageKey imageKey) {
+        this.imageKey = imageKey;
     }
 
     protected void onDownloadComplete(Bitmap bitmap) {
-        if (mCallback != null) {
-            mCallback.onLoad(bitmap, null, 0);
+        if(listCallback!= null){
+            for(MyDownloadCallback callback: listCallback){
+                callback.onLoad(bitmap, null, 0);
+            }
         }
-    }
-
-    protected void onDownloadComplete(Bitmap bitmap, MyDownloadCallback callback) {
-        if (callback != null) {
-            callback.onLoad(bitmap, null, 0);
-        }
+        listCallback.clear();
     }
 
     public interface MyDownloadCallback {
         void onLoad(Bitmap bitmap, Object which, int resultCode);
+    }
+
+    public void setImageBitmap(byte[] bytes, BitmapFactory.Options options){
+        boolean mMaxSize = false;
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+        options.inSampleSize = caculateInSampleSize(options, imageKey.getSize(), imageKey.getSize());
+        int width = options.outWidth;
+        int height = options.outHeight;
+        options.inJustDecodeBounds = false;
+        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+        if (width == bitmap.getWidth() && height == bitmap.getHeight()) {
+            mMaxSize = true;
+        }
+        onDownloadComplete(bitmap);
+        ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
+    }
+
+    private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {
+        int inSampleSize = 1;
+        while (((options.outHeight / 2) / inSampleSize) >= heightReq && ((options.outWidth / 2) / inSampleSize) >= widthReq) {
+            inSampleSize *= 2;
+        }
+        return inSampleSize;
     }
 }

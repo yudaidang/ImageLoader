@@ -39,6 +39,11 @@ public class DownloadImageRunnable implements Runnable {
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         byte[] bytes = downloadImage(mUrl);
         DataDownload data = new DataDownload(mUrl, bytes);
         Message message = mHandler.obtainMessage(IMAGE_DOWNLOAD_RESULT_CODE, data);

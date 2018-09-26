@@ -22,4 +22,14 @@ public class CallBackImageView implements ImageWorker.MyDownloadCallback {
             imageView.get().setImageBitmap(bitmap);
         }
     }
+
+    @Override
+    public int hashCode() {
+        return imageView.get().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && obj.hashCode() == this.hashCode();
+    }
 }

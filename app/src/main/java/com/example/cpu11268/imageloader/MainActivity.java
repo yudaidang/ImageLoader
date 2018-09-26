@@ -1525,7 +1525,7 @@ public class MainActivity extends AppCompatActivity {
 
     private List<BaseViewItem> buildItems() {
         List<BaseViewItem> items = new ArrayList<>(60);
-      /*  items.add(mockNewFeedItem("A.Hiệp ", getRandomTime(), getRandomMessage(), "https://f28-org-zp.zdn.vn/73c4cc524b22a17cf833.jpg"));
+        /*items.add(mockNewFeedItem("A.Hiệp ", getRandomTime(), getRandomMessage(), "https://f28-org-zp.zdn.vn/73c4cc524b22a17cf833.jpg"));
         items.add(mockNewFeedItem("A.Hiệp ", getRandomTime(), getRandomMessage(), "https://f28-org-zp.zdn.vn/73c4cc524b22a17cf833.jpg"));
         items.add(mockNewFeedItem("A.Quang", getRandomTime(), getRandomMessage(), "https://f26-org-zp.zdn.vn/a0400648beab55f50cba.jpg"));
         items.add(mockNewFeedItem("Trúc", getRandomTime(), getRandomMessage(), "https://f16-org-zp.zdn.vn/b90c683372279a79c336.jpg"));
