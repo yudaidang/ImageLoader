@@ -1,14 +1,11 @@
 package com.example.cpu11268.imageloader.ImageLoader;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.AddImageRunnable;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.DataDownload;
-import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
 
 import org.apache.commons.io.IOUtils;
 
@@ -29,21 +26,18 @@ public class DownloadImageRunnable implements Runnable {
             TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     private Handler mHandler;
     private String mUrl;
+    private String diskPath;
 
-    public DownloadImageRunnable(String mUrl, Handler mHandler) {
+    public DownloadImageRunnable(String mUrl, Handler mHandler, String diskPath) {
         this.mUrl = mUrl;
         this.mHandler = mHandler;
+        this.diskPath = diskPath;
     }
 
 
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         byte[] bytes = downloadImage(mUrl);
         DataDownload data = new DataDownload(mUrl, bytes);
         Message message = mHandler.obtainMessage(IMAGE_DOWNLOAD_RESULT_CODE, data);
@@ -68,7 +62,7 @@ public class DownloadImageRunnable implements Runnable {
 
             bytes = IOUtils.toByteArray(inputStream);
 
-            AddImageRunnable addImageRunnable = new AddImageRunnable(imgUrl, bytes);
+            AddImageRunnable addImageRunnable = new AddImageRunnable(imgUrl, bytes, diskPath);
             mExecutor.execute(addImageRunnable);
 
         } catch (IOException e) {

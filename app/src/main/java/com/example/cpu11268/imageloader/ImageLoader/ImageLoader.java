@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -36,9 +38,7 @@ public class ImageLoader implements Handler.Callback {
     protected int mHeight = DEFAULT_MAX_SIZE;
     private Executor executor;
     private WeakReference<View> view;
-
     private HashMap<Integer, ImageWorker> listImageWorker = new HashMap<>();
-
     //Integer view.hashcode();
 
     private HashMap<Integer, Runnable> listTaskQueue = new HashMap<>();
@@ -160,11 +160,11 @@ public class ImageLoader implements Handler.Callback {
         return sInstance;
     }
 
-    public void loadImageWorker(Context context, String mUrl, View view) {
+    public void loadImageWorker(Context context, String mUrl, View view, String diskPath) {
         this.mWidth = (int) (view.getLayoutParams().width / (Resources.getSystem().getDisplayMetrics().density));
         this.mHeight = (int) (view.getLayoutParams().height / (Resources.getSystem().getDisplayMetrics().density));
         this.view = new WeakReference<>(view);
-        this.loadImageWorker(context, mUrl, new CallBackImageView((ImageView) view));
+        this.loadImageWorker(context, mUrl, new CallBackImageView((ImageView) view), diskPath);
     }
 
     public void setWidthHeight(int mWidth, int mHeight) {
@@ -172,41 +172,35 @@ public class ImageLoader implements Handler.Callback {
         this.mHeight = mHeight;
     }
 
-    public void loadImageWorker(Context context, String mUrl, ImageWorker.MyDownloadCallback mCallback) {
+    public void loadImageWorker(Context context, String mUrl, ImageWorker.MyDownloadCallback mCallback, String diskPath) {
         ImageKey imageKey = new ImageKey(mUrl, mWidth, mHeight);
         ImageWorker imageWorker;
-        imageWorker = getImageKey(imageKey);
-        if (imageWorker == null) {
-            imageWorker = new ImageWorker(imageKey);
-        }
-        clearCallback(mCallback, mUrl);
-        imageWorker.listCallback.add(mCallback);
-        listImageWorker.put(mCallback.hashCode(), imageWorker);
+        imageWorker = getImageWorker(imageKey);
 
-        if (DiskCacheSimple.getInstance().getDiskCacheDir() == null) {
-            File diskCacheDir = getDiskCacheDir(context.getApplicationContext(), "IMAGE");
-            if (!diskCacheDir.exists()) {
-                diskCacheDir.mkdirs();
-            }
-            DiskCacheSimple.getInstance().setListFile(diskCacheDir);
+        if(imageWorker == null){
+            imageWorker = new ImageWorker(imageKey);
+            listImageWorker.put(mCallback.hashCode(), imageWorker);
+        }else{
+            clearCallback(mCallback, mUrl);
         }
+        imageWorker.listCallback.add(mCallback);
 
         Bitmap bitmap;
 
-        if (mUrl == null) {
+        if (TextUtils.isEmpty(mUrl)) {
             imageWorker.onDownloadComplete(null);
-        }
-
-        bitmap = ImageCache.getInstance().findBitmapCache(imageKey);
-        if (bitmap == null) {
-            DiskBitmapRunnable diskBitmapRunnable = new DiskBitmapRunnable(context,
-                    imageWorker);
-            if (view != null) {
-                listTaskQueue.put(view.get().hashCode(), diskBitmapRunnable);
-            }
-            executor.execute(diskBitmapRunnable);
         } else {
-            imageWorker.onDownloadComplete(bitmap);
+            bitmap = ImageCache.getInstance().findBitmapCache(imageKey);
+            if (bitmap == null) {
+                DiskBitmapRunnable diskBitmapRunnable = new DiskBitmapRunnable(context,
+                        imageWorker, diskPath);
+                if (view != null) {
+                    listTaskQueue.put(view.get().hashCode(), diskBitmapRunnable);
+                }
+                executor.execute(diskBitmapRunnable);
+            } else {
+                imageWorker.onDownloadComplete(bitmap);
+            }
         }
     }
 
@@ -220,7 +214,7 @@ public class ImageLoader implements Handler.Callback {
     public void clearCallback(ImageWorker.MyDownloadCallback callback, String mUrl) {
         if (callback != null) {
             ImageWorker imageWorker = listImageWorker.get(callback);
-            if (imageWorker != null && (imageWorker.imageKey.getmUrl() != mUrl) && imageWorker.listCallback.remove(callback)) {
+            if (imageWorker != null && (imageWorker.imageKey.getmUrl() != mUrl) && imageWorker.listCallback.contains(callback)) {
                 listImageWorker.remove(callback);
             }
         }
@@ -256,7 +250,7 @@ public class ImageLoader implements Handler.Callback {
         if (msg.what == DiskBitmapRunnable.IMAGE_LOADED_FROM_DISK_RESULT_CODE) {
             MessageBitmap messageBitmap = (MessageBitmap) msg.obj;
 
-            ImageWorker imageWorker = getImageKey(messageBitmap.getImageKey());
+            ImageWorker imageWorker = getImageWorker(messageBitmap.getImageKey());
             if (imageWorker != null) {
                 imageWorker.onDownloadComplete(messageBitmap.getmBitmap());
             }
@@ -274,7 +268,7 @@ public class ImageLoader implements Handler.Callback {
         }
     }
 
-    private ImageWorker getImageKey(ImageKey imageKey) {
+    private ImageWorker getImageWorker(ImageKey imageKey) {
         for (ImageWorker ik : listImageWorker.values()) {
             if (ik.imageKey.equals(imageKey)) {
                 return ik;

@@ -3,6 +3,7 @@ package com.example.cpu11268.imageloader.RecyclerView.Holder;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,8 +14,10 @@ import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 import com.example.cpu11268.imageloader.R;
 import com.example.cpu11268.imageloader.RecyclerView.view_item.NewFeedItem;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
@@ -66,11 +69,18 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
 //            ImageWorker imageWorker = new ImageWorker(item.getmNewFeed().getmUrlImage(), mAvatar);
 /*            ImageWorker imageWorker = new ImageWorker(item.getmNewFeed().getmUrlImage(), img);
             imageWorker.setWidthHeight(40, 40);*/
-            ImageLoader.getInstance().loadImageWorker(mContext, item.getmNewFeed().getmUrlImage(), mAvatar);
+
+            final String cachePath =
+                    Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ?
+                            Objects.requireNonNull(mContext.getExternalCacheDir()).getPath() :
+                            mContext.getCacheDir().getPath();
+
+            ImageLoader.getInstance().loadImageWorker(mContext, item.getmNewFeed().getmUrlImage(), mAvatar, cachePath + File.separator + "YUDAIDANG");
             mName.setText(item.getmNewFeed().getmName());
 
         }
     }
+
 
     @Override
     public void onRecycled() {

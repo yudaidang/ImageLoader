@@ -15,7 +15,7 @@ public class CallBackImageView implements ImageWorker.MyDownloadCallback {
     public CallBackImageView(ImageView imageView) {
         this.imageView = new WeakReference<>(imageView);
     }
-
+    //remove which
     @Override
     public void onLoad(Bitmap bitmap, Object which, int resultCode) {
         if (imageView.get() != null) {

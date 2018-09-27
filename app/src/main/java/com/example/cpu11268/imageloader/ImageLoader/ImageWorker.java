@@ -41,8 +41,8 @@ public class ImageWorker {//generic
         if (width == bitmap.getWidth() && height == bitmap.getHeight()) {
             mMaxSize = true;
         }
-        onDownloadComplete(bitmap);
         ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
+        onDownloadComplete(bitmap);
     }
 
     private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {

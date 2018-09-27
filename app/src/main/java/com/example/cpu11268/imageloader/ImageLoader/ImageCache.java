@@ -10,7 +10,7 @@ public class ImageCache {
     public static final int DEFAULT_MAX_SIZE = 66000;
     private static final int MAX_SIZE = 0;
     private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCache;
-                private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCacheLarge;
+    private static LruCache<ImageKey, ValueBitmapMemCache> mMemoryCacheLarge;
     private static ImageCache sInstance = new ImageCache();
     private int maxMemory = (int) Runtime.getRuntime().maxMemory();
     private int cacheSize = maxMemory / 8;
@@ -115,9 +115,9 @@ public class ImageCache {
     }
 
     // Disk Cache
-    public synchronized void addBitmapToDiskCache(String key, byte[] bytes) {
+    public synchronized void addBitmapToDiskCache(String key, byte[] bytes, String diskPath) {
         if (DiskCacheSimple.getInstance().get(key) == null) {
-            DiskCacheSimple.getInstance().put(key, bytes);
+            DiskCacheSimple.getInstance().put(key, bytes, diskPath);
         }
     }
 
