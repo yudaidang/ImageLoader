@@ -3,53 +3,61 @@ package com.example.cpu11268.imageloader.ImageLoader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import java.util.HashSet;
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.ImageWorkerMain;
 
-public class ImageWorker {//generic
-    public static final int DEFAULT_MAX_SIZE = 0;
+import java.util.HashMap;
 
-    protected ImageKey imageKey;
+public class ImageWorker extends ImageWorkerMain {//generic
 
-    public HashSet<MyDownloadCallback> listCallback = new HashSet<>();
+    protected HashMap<Integer, HashMap<Integer, ImageKey>> mListDecoded = new HashMap<>();
 
     public ImageWorker(ImageKey imageKey) {
-        this.imageKey = imageKey;
+        super(imageKey);
     }
 
-    protected void onDownloadComplete(Bitmap bitmap) {
-        if(listCallback!= null){
-            for(MyDownloadCallback callback: listCallback){
-                callback.onLoad(bitmap, null, 0);
-            }
-        }
-        listCallback.clear();
-    }
-
-    public interface MyDownloadCallback {
-        void onLoad(Bitmap bitmap, Object which, int resultCode);
-    }
-
-    public void setImageBitmap(byte[] bytes, BitmapFactory.Options options){
+    public void setImageBitmap(byte[] bytes, BitmapFactory.Options options) {
         boolean mMaxSize = false;
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-        options.inSampleSize = caculateInSampleSize(options, imageKey.getSize(), imageKey.getSize());
-        int width = options.outWidth;
-        int height = options.outHeight;
-        options.inJustDecodeBounds = false;
-        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-        if (width == bitmap.getWidth() && height == bitmap.getHeight()) {
-            mMaxSize = true;
+        Bitmap bitmap = null;
+        HashMap<Integer, ImageKey> list;
+        if (mListDecoded.get(imageKey.getmUrl().hashCode()) != null) {
+            list = mListDecoded.get(imageKey.getmUrl().hashCode());
+            int sampleSize = caculateInSampleSize(imageKey.getmOutWidth(), imageKey.getmOutHeight(), imageKey.getSize(), imageKey.getSize());
+            if (list.get(sampleSize) != null) {
+                bitmap = ImageCache.getInstance().findBitmapCache(list.get(sampleSize));
+            }
+            if (bitmap == null) {
+                list.remove(sampleSize);
+            }
+        } else {
+            list = new HashMap<>();
         }
-        ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
+        if (bitmap == null) {
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+            int sampleSize = caculateInSampleSize(options.outWidth, options.outHeight, imageKey.getSize(), imageKey.getSize());
+            options.inSampleSize = sampleSize;
+            int width = options.outWidth;
+            int height = options.outHeight;
+            options.inJustDecodeBounds = false;
+            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+            imageKey.setmOutHeight(height);
+            imageKey.setmOutWidth(width);
+            list.put(sampleSize, imageKey);
+            if (width == bitmap.getWidth() && height == bitmap.getHeight()) {
+                mMaxSize = true;
+            }
+            ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
+        }
+        mListDecoded.put(imageKey.getmUrl().hashCode(), list);
         onDownloadComplete(bitmap);
     }
 
-    private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {
+    private int caculateInSampleSize(int outWidth, int outHeight, int widthReq, int heightReq) {
         int inSampleSize = 1;
-        while (((options.outHeight / 2) / inSampleSize) >= heightReq && ((options.outWidth / 2) / inSampleSize) >= widthReq) {
+        while (((outHeight / 2) / inSampleSize) >= heightReq && ((outWidth / 2) / inSampleSize) >= widthReq) {
             inSampleSize *= 2;
         }
         return inSampleSize;
     }
+
 }

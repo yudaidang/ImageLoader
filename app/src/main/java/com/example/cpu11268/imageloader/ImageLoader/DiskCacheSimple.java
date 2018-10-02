@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 
 public class DiskCacheSimple {
-    private static final int DEFAULT_MAX_SIZE = 1024 * 1024 * 30;
     private static DiskCacheSimple sInstance = new DiskCacheSimple();
     private BitmapPolicy mBitmapPolicy;
     private File diskCacheDir = null;

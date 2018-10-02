@@ -15,9 +15,6 @@ import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkChecker;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
@@ -46,7 +43,7 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
     public void run() {
         Process.setThreadPriority(PRIORITY_THREAD);
 
-        if(TextUtils.isEmpty(diskCachePath)) {
+        if (TextUtils.isEmpty(diskCachePath)) {
             if (DiskCacheSimple.getInstance().getDiskCacheDir() == null) {
                 diskCachePath = getDiskPath(mContext.get(), "IMAGE");
                 DiskCacheSimple.getInstance().setDiskCacheDir(new File(diskCachePath));
@@ -93,6 +90,8 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
         message.sendToTarget();
     }
 
+
+    // NOT FIX
     @Override
     public boolean handleMessage(Message msg) {
         if (msg.what == DownloadImageRunnable.IMAGE_DOWNLOAD_RESULT_CODE) {

@@ -85,7 +85,7 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     @Override
     public void onRecycled() {
         super.onRecycled();
-//        ImageLoader.getInstance().clearView(mAvatar);
+        ImageLoader.getInstance().clearView(mAvatar);
     }
 
     @Override
