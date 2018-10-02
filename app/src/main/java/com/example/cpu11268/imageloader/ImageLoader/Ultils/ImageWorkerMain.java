@@ -20,7 +20,11 @@ public class ImageWorkerMain {
     public void onDownloadComplete(Bitmap bitmap, int resultCode) {
         if (listCallback != null) {
             for (ImageWorker.MyDownloadCallback callback : listCallback) {
-                callback.onLoad(bitmap, null, resultCode);
+                try {
+                    callback.onLoad(bitmap, null, resultCode);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             }
         }
         listCallback.clear();
