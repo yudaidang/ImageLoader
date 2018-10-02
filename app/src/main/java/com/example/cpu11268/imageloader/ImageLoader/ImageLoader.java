@@ -3,7 +3,6 @@ package com.example.cpu11268.imageloader.ImageLoader;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
@@ -13,12 +12,10 @@ import android.widget.ImageView;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.CallBackImageView;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -30,11 +27,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class ImageLoader implements Handler.Callback {
     public static final int DEFAULT_MAX_SIZE = 0;
-    public static final int LOAD_INTERNET = 1;
-    public static final int LOAD_DISK = 2;
-    public static final int LOAD_MEM = 3;
-    public static final int URL_NULL = 4;
-    public static final int INTENER_NOT_CONNECT = 5;
+    public static final int LOAD_INTERNET = 101;
+    public static final int LOAD_DISK = 102;
+    public static final int LOAD_MEM = 103;
+    public static final int URL_NULL = 104;
+    public static final int INTENER_NOT_CONNECT = 105;
     protected static Executor executorInternet;
     private static ImageLoader sInstance = new ImageLoader();
     protected final Handler mHandler;
@@ -227,7 +224,7 @@ public class ImageLoader implements Handler.Callback {
     public void clearCallback(ImageWorker.MyDownloadCallback callback) {
         if (callback != null) {
             ImageWorker imageWorker = listImageWorker.get(callback);
-            if (imageWorker != null && imageWorker.listCallback.remove(callback)) {
+            if (imageWorker != null && imageWorker.listCallback.contains(callback)) {
                 listImageWorker.remove(callback);
             }
         }
@@ -235,19 +232,8 @@ public class ImageLoader implements Handler.Callback {
 
     public void clearView(View view) {
         ImageWorker.MyDownloadCallback callback = new CallBackImageView((ImageView) view);
-        if (callback != null) {
-            clearCallback(callback);
-        }
+        clearCallback(callback);
     }
-
-    private File getDiskCacheDir(Context context, String uniqueName) {
-        final String cachePath =
-                Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ?
-                        Objects.requireNonNull(context.getExternalCacheDir()).getPath() :
-                        context.getCacheDir().getPath();
-        return new File(cachePath + File.separator + uniqueName);
-    }
-
 
     @Override
     public boolean handleMessage(Message msg) {

@@ -6,9 +6,10 @@ import android.graphics.BitmapFactory;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ImageWorkerMain;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class ImageWorker extends ImageWorkerMain {//generic
-
+    //Integer1: mUrl, Integer2: SampleSize
     protected HashMap<Integer, HashMap<Integer, ImageKey>> mListDecoded = new HashMap<>();
 
     public ImageWorker(ImageKey imageKey) {
@@ -21,7 +22,10 @@ public class ImageWorker extends ImageWorkerMain {//generic
         HashMap<Integer, ImageKey> list;
         if (mListDecoded.get(imageKey.getmUrl().hashCode()) != null) {
             list = mListDecoded.get(imageKey.getmUrl().hashCode());
-            int sampleSize = caculateInSampleSize(imageKey.getmOutWidth(), imageKey.getmOutHeight(), imageKey.getSize(), imageKey.getSize());
+            Map.Entry<Integer, ImageKey> entry = list.entrySet().iterator().next();
+
+            ImageKey im = entry.getValue();
+            int sampleSize = caculateInSampleSize(im.getmOutWidth(), im.getmOutHeight(), imageKey.getSize(), imageKey.getSize());
             if (list.get(sampleSize) != null) {
                 bitmap = ImageCache.getInstance().findBitmapCache(list.get(sampleSize));
             }

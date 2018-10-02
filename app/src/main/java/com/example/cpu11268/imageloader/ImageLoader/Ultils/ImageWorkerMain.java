@@ -11,7 +11,6 @@ public class ImageWorkerMain {
     public static final int DEFAULT_MAX_SIZE = 0;
     public HashSet<ImageWorker.MyDownloadCallback> listCallback = new HashSet<>();
     public ImageKey imageKey;
-    //Integer1: mUrl, Integer2: SampleSize
 
     public ImageWorkerMain(ImageKey imageKey) {
         this.imageKey = imageKey;
@@ -22,7 +21,7 @@ public class ImageWorkerMain {
             for (ImageWorker.MyDownloadCallback callback : listCallback) {
                 try {
                     callback.onLoad(bitmap, null, resultCode);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
