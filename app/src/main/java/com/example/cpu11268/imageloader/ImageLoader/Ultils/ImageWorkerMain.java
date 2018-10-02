@@ -17,10 +17,10 @@ public class ImageWorkerMain {
         this.imageKey = imageKey;
     }
 
-    public void onDownloadComplete(Bitmap bitmap) {
+    public void onDownloadComplete(Bitmap bitmap, int resultCode) {
         if (listCallback != null) {
             for (ImageWorker.MyDownloadCallback callback : listCallback) {
-                callback.onLoad(bitmap, null, 0);
+                callback.onLoad(bitmap, null, resultCode);
             }
         }
         listCallback.clear();

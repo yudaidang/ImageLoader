@@ -7,7 +7,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -31,6 +30,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class ImageLoader implements Handler.Callback {
     public static final int DEFAULT_MAX_SIZE = 0;
+    public static final int LOAD_INTERNET = 1;
+    public static final int LOAD_DISK = 2;
+    public static final int LOAD_MEM = 3;
+    public static final int URL_NULL = 4;
+    public static final int INTENER_NOT_CONNECT = 5;
     protected static Executor executorInternet;
     private static ImageLoader sInstance = new ImageLoader();
     protected final Handler mHandler;
@@ -177,10 +181,10 @@ public class ImageLoader implements Handler.Callback {
         ImageWorker imageWorker;
         imageWorker = getImageWorker(imageKey);
 
-        if(imageWorker == null){
+        if (imageWorker == null) {
             imageWorker = new ImageWorker(imageKey);
             listImageWorker.put(mCallback.hashCode(), imageWorker);
-        }else{
+        } else {
             clearCallback(mCallback, mUrl);
         }
         imageWorker.listCallback.add(mCallback);
@@ -188,7 +192,7 @@ public class ImageLoader implements Handler.Callback {
         Bitmap bitmap;
 
         if (TextUtils.isEmpty(mUrl)) {
-            imageWorker.onDownloadComplete(null);
+            imageWorker.onDownloadComplete(null, URL_NULL);
         } else {
             bitmap = ImageCache.getInstance().findBitmapCache(imageKey);
             if (bitmap == null) {
@@ -199,7 +203,7 @@ public class ImageLoader implements Handler.Callback {
                 }
                 executor.execute(diskBitmapRunnable);
             } else {
-                imageWorker.onDownloadComplete(bitmap);
+                imageWorker.onDownloadComplete(bitmap, LOAD_MEM);
             }
         }
     }
@@ -247,12 +251,12 @@ public class ImageLoader implements Handler.Callback {
 
     @Override
     public boolean handleMessage(Message msg) {
-        if (msg.what == DiskBitmapRunnable.IMAGE_LOADED_FROM_DISK_RESULT_CODE) {
+        if (msg.what == ImageLoader.LOAD_DISK || msg.what == ImageLoader.INTENER_NOT_CONNECT) {
             MessageBitmap messageBitmap = (MessageBitmap) msg.obj;
 
             ImageWorker imageWorker = getImageWorker(messageBitmap.getImageKey());
             if (imageWorker != null) {
-                imageWorker.onDownloadComplete(messageBitmap.getmBitmap());
+                imageWorker.onDownloadComplete(messageBitmap.getmBitmap(), msg.what);
             }
             removeCallback(imageWorker);
         }

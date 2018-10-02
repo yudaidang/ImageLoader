@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 public class DownloadImageRunnable implements Runnable {
 
-    public static final int IMAGE_DOWNLOAD_RESULT_CODE = 100;
     private static Executor mExecutor = new ThreadPoolExecutor(2,
             3, 60L,
             TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -40,7 +39,7 @@ public class DownloadImageRunnable implements Runnable {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         byte[] bytes = downloadImage(mUrl);
         DataDownload data = new DataDownload(mUrl, bytes);
-        Message message = mHandler.obtainMessage(IMAGE_DOWNLOAD_RESULT_CODE, data);
+        Message message = mHandler.obtainMessage(ImageLoader.LOAD_INTERNET, data);
         message.sendToTarget();
     }
 

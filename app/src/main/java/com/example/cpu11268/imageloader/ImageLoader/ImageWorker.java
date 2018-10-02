@@ -15,7 +15,7 @@ public class ImageWorker extends ImageWorkerMain {//generic
         super(imageKey);
     }
 
-    public void setImageBitmap(byte[] bytes, BitmapFactory.Options options) {
+    public void setImageBitmap(byte[] bytes, BitmapFactory.Options options, int resultCode) {
         boolean mMaxSize = false;
         Bitmap bitmap = null;
         HashMap<Integer, ImageKey> list;
@@ -49,7 +49,7 @@ public class ImageWorker extends ImageWorkerMain {//generic
             ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
         }
         mListDecoded.put(imageKey.getmUrl().hashCode(), list);
-        onDownloadComplete(bitmap);
+        onDownloadComplete(bitmap, resultCode);
     }
 
     private int caculateInSampleSize(int outWidth, int outHeight, int widthReq, int heightReq) {

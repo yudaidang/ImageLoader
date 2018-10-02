@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.Set;
 
 public class DiskBitmapRunnable implements Runnable, Handler.Callback {
-    public static final int IMAGE_LOADED_FROM_DISK_RESULT_CODE = 101;
     private final WeakReference<Context> mContext;
     private final BitmapFactory.Options options = new BitmapFactory.Options();
     private final Handler mHandlerDownload;
@@ -63,7 +62,7 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
                 bitmap = ImageCache.getInstance().getBitmapFromDiskCache(diskCachePath + File.separator + imageWorker.imageKey.getmUrl().hashCode(), imageWorker.imageKey.getSize(), imageWorker.imageKey.getSize(), options);
             }
             ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageWorker.imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
-            handleResult(imageWorker.imageKey, bitmap);
+            handleResult(imageWorker.imageKey, bitmap, ImageLoader.LOAD_DISK);
         } else {
             if (mContext.get() != null && NetworkChecker.isOnline(mContext.get())) {
                 HashSet<ImageWorker> list;
@@ -79,14 +78,14 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
                 listDownloading.put(imageWorker.imageKey.getmUrl(), list);
 
             } else {
-                handleResult(imageWorker.imageKey, null);
+                handleResult(imageWorker.imageKey, null, ImageLoader.INTENER_NOT_CONNECT);
             }
         }
     }
 
-    private void handleResult(ImageKey imageKey, Bitmap bitmap) {
+    private void handleResult(ImageKey imageKey, Bitmap bitmap, int resultCode) {
         MessageBitmap messageBitmap = new MessageBitmap(imageKey, bitmap, false);
-        Message message = ImageLoader.getInstance().mHandler.obtainMessage(IMAGE_LOADED_FROM_DISK_RESULT_CODE, messageBitmap);
+        Message message = ImageLoader.getInstance().mHandler.obtainMessage(resultCode, messageBitmap);
         message.sendToTarget();
     }
 
@@ -94,13 +93,13 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
     // NOT FIX
     @Override
     public boolean handleMessage(Message msg) {
-        if (msg.what == DownloadImageRunnable.IMAGE_DOWNLOAD_RESULT_CODE) {
+        if (msg.what == ImageLoader.LOAD_INTERNET) {
             DataDownload data = (DataDownload) msg.obj;
             if (listDownloading.containsKey(data.getmUrl())) {
                 Set<ImageWorker> list = listDownloading.get(data.getmUrl());
                 if (list != null) {
                     for (ImageWorker ik : list) {
-                        ik.setImageBitmap(data.getBytes(), options);
+                        ik.setImageBitmap(data.getBytes(), options, msg.what);
                     }
                 }
                 listDownloading.remove(data.getmUrl());
