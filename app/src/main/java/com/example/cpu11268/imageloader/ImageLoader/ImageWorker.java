@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ImageWorker extends ImageWorkerMain {//generic
-    //Integer1: mUrl, Integer2: SampleSize
+    //Integer1: mUrl
+    //Integer2: Sample Size
+    //List nhung nhung sample size da duoc download voi cung 1 url
     protected HashMap<Integer, HashMap<Integer, ImageKey>> mListDecoded = new HashMap<>();
 
     public ImageWorker(ImageKey imageKey) {
@@ -26,7 +28,7 @@ public class ImageWorker extends ImageWorkerMain {//generic
 
             ImageKey im = entry.getValue();
             int sampleSize = caculateInSampleSize(im.getmOutWidth(), im.getmOutHeight(), imageKey.getSize(), imageKey.getSize());
-            if (list.get(sampleSize) != null) {
+            if (list.containsKey(sampleSize)) {
                 bitmap = ImageCache.getInstance().findBitmapCache(list.get(sampleSize));
             }
             if (bitmap == null) {
