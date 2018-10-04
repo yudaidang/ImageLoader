@@ -6,8 +6,6 @@ import android.util.Log;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -17,12 +15,11 @@ public class BitmapPolicy {
         BufferedOutputStream buf = null;
         try {
             FileOutputStream fl = new FileOutputStream(outputFile);
-            buf = new BufferedOutputStream(fl );
+            buf = new BufferedOutputStream(fl);
             buf.write(value);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             Log.e("LOGLOG", ex.getMessage());
-        }
-        finally {
+        } finally {
             if (buf != null) {
 
                 buf.flush();

@@ -54,11 +54,9 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
 
         ValueBitmap bitmap;
 
-        boolean mMaxSize = false;
         if (ImageCache.getInstance().isBitmapFromDiskCache(imageWorker.imageKey.getmUrl())) {
             if (imageWorker.imageKey.getSize() == ImageWorker.DEFAULT_MAX_SIZE) {
                 bitmap = ImageCache.getInstance().getBitmapFromDiskCache(diskCachePath + File.separator + imageWorker.imageKey.getmUrl().hashCode(), imageWorker.imageKey.getmUrl());
-                mMaxSize = true;
             } else {
                 bitmap = ImageCache.getInstance().getBitmapFromDiskCache(diskCachePath + File.separator + imageWorker.imageKey.getmUrl().hashCode(), imageWorker.imageKey.getSize(), imageWorker.imageKey.getSize(), options, imageWorker.imageKey.getmUrl());
             }

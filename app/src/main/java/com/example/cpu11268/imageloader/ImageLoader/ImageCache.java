@@ -10,18 +10,15 @@ import com.example.cpu11268.imageloader.ImageLoader.Ultils.WidthHeight;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class ImageCache {
-    public static final int DEFAULT_MAX_SIZE = 66000;
-    private static final int MAX_SIZE = 0;
+    private static final int DEFAULT_MAX_SIZE = 66000;
     private static LruCache<KeyBitmap, Bitmap> mMemoryCache;
     private static LruCache<KeyBitmap, Bitmap> mMemoryCacheLarge;
     private static ImageCache sInstance = new ImageCache();
     private int maxMemory = (int) Runtime.getRuntime().maxMemory();
     private int cacheSize = maxMemory / 8;
 
-    private HashSet<ImageKey> mListMaxSize = new HashSet<>();
     private HashMap<String, WidthHeight> list = new HashMap<>();
 
     private ImageCache() {

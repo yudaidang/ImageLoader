@@ -2,8 +2,6 @@ package com.example.cpu11268.imageloader.ImageLoader.Ultils;
 
 import com.example.cpu11268.imageloader.ImageLoader.ImageCache;
 
-import java.io.File;
-
 public class AddImageRunnable implements Runnable {
 
     private String mImageUrl;
