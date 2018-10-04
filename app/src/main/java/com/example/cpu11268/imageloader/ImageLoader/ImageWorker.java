@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ImageWorkerMain;
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class ImageWorker extends ImageWorkerMain {//generic
             ImageKey im = entry.getValue();
             int sampleSize = caculateInSampleSize(im.getmOutWidth(), im.getmOutHeight(), imageKey.getSize(), imageKey.getSize());
             if (list.containsKey(sampleSize)) {
-                bitmap = ImageCache.getInstance().findBitmapCache(list.get(sampleSize));
+                bitmap = ImageCache.getInstance().findBitmapCache(imageKey.getSize(), imageKey.getSize(), imageKey.getmUrl());
             }
             if (bitmap == null) {
                 list.remove(sampleSize);
@@ -49,10 +50,7 @@ public class ImageWorker extends ImageWorkerMain {//generic
             imageKey.setmOutHeight(height);
             imageKey.setmOutWidth(width);
             list.put(sampleSize, imageKey);
-            if (width == bitmap.getWidth() && height == bitmap.getHeight()) {
-                mMaxSize = true;
-            }
-            ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
+            ImageCache.getInstance().addBitmapToMemoryCacheTotal(new ValueBitmap(bitmap, sampleSize, imageKey.getmUrl(), width, height)); //?
         }
         mListDecoded.put(imageKey.getmUrl().hashCode(), list);
         onDownloadComplete(bitmap, resultCode);

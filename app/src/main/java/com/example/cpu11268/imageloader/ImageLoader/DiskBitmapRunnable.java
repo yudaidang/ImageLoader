@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.DataDownload;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.NetworkChecker;
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmap;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -51,18 +52,19 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
             }
         }
 
-        Bitmap bitmap;
+        ValueBitmap bitmap;
 
         boolean mMaxSize = false;
         if (ImageCache.getInstance().isBitmapFromDiskCache(imageWorker.imageKey.getmUrl())) {
             if (imageWorker.imageKey.getSize() == ImageWorker.DEFAULT_MAX_SIZE) {
-                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(diskCachePath + File.separator + imageWorker.imageKey.getmUrl().hashCode());
+                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(diskCachePath + File.separator + imageWorker.imageKey.getmUrl().hashCode(), imageWorker.imageKey.getmUrl());
                 mMaxSize = true;
             } else {
-                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(diskCachePath + File.separator + imageWorker.imageKey.getmUrl().hashCode(), imageWorker.imageKey.getSize(), imageWorker.imageKey.getSize(), options);
+                bitmap = ImageCache.getInstance().getBitmapFromDiskCache(diskCachePath + File.separator + imageWorker.imageKey.getmUrl().hashCode(), imageWorker.imageKey.getSize(), imageWorker.imageKey.getSize(), options, imageWorker.imageKey.getmUrl());
             }
-            ImageCache.getInstance().addBitmapToMemoryCacheTotal(imageWorker.imageKey, new ValueBitmapMemCache(bitmap, mMaxSize)); //?
-            handleResult(imageWorker.imageKey, bitmap, ImageLoader.LOAD_DISK);
+            ImageCache.getInstance().addBitmapToMemoryCacheTotal(bitmap); //?
+
+            handleResult(imageWorker.imageKey, bitmap.getmBitmap(), ImageLoader.LOAD_DISK);
         } else {
             if (mContext.get() != null && NetworkChecker.isOnline(mContext.get())) {
                 HashSet<ImageWorker> list;

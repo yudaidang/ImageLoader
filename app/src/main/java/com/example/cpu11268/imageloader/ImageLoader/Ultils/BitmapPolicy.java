@@ -32,17 +32,23 @@ public class BitmapPolicy {
     }
 
 
-    public Bitmap read(File inputFile, int width, int height, BitmapFactory.Options options) {
+    public ValueBitmap read(File inputFile, int width, int height, BitmapFactory.Options options, String mUrl) {
+        int mSampleSize, mOutWidth, mOutHeight;
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(inputFile.getAbsolutePath(), options);
-        options.inSampleSize = caculateInSampleSize(options, width, height);
+        mSampleSize = caculateInSampleSize(options, width, height);
+        mOutWidth = options.outWidth;
+        mOutHeight = options.outHeight;
+        options.inSampleSize = mSampleSize;
         options.inMutable = true;
         options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(inputFile.getAbsolutePath(), options);
+        Bitmap bitmap = BitmapFactory.decodeFile(inputFile.getAbsolutePath(), options);
+        return new ValueBitmap(bitmap, mSampleSize, mUrl, mOutWidth, mOutHeight);
     }
 
-    public Bitmap read(File inputFile) {
-        return BitmapFactory.decodeFile(inputFile.getAbsolutePath());
+    public ValueBitmap read(File inputFile, String mUrl) {
+        Bitmap bitmap = BitmapFactory.decodeFile(inputFile.getAbsolutePath());
+        return new ValueBitmap(bitmap, 1, mUrl, bitmap.getWidth(), bitmap.getHeight());
     }
 
     private int caculateInSampleSize(BitmapFactory.Options options, int widthReq, int heightReq) {

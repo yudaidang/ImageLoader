@@ -1,9 +1,9 @@
 package com.example.cpu11268.imageloader.ImageLoader;
 
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.BitmapPolicy;
+import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmap;
 
 import org.apache.commons.io.FileUtils;
 
@@ -82,19 +82,19 @@ public class DiskCacheSimple {
         return f.exists() && f.length() != 0 ? true : false;
     }
 
-    public synchronized Bitmap get(String mPath) {
-        return isExistFile(mPath) ? mBitmapPolicy.read(new File(mPath)) : null;
+    public synchronized ValueBitmap get(String mPath, String mUrl) {
+        return isExistFile(mPath) ? mBitmapPolicy.read(new File(mPath), mUrl) : null;
     }
 
-    public synchronized Bitmap get(String mPath, int width, int height, BitmapFactory.Options options) {
-        return isExistFile(mPath) ? mBitmapPolicy.read(new File(mPath), width, height, options) : null;
+    public synchronized ValueBitmap get(String mPath, int width, int height, BitmapFactory.Options options, String mUrl) {
+        return isExistFile(mPath) ? mBitmapPolicy.read(new File(mPath), width, height, options, mUrl) : null;
     }
 
     //editting
     public synchronized boolean put(String key, byte[] value, String diskPath) {
         if (value.length != 0) {
             File file = new File(diskPath);
-            if(!file.exists()) {
+            if (!file.exists()) {
                 file.mkdirs();
             }
 

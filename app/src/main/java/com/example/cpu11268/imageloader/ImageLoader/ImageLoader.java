@@ -191,7 +191,7 @@ public class ImageLoader implements Handler.Callback {
         if (TextUtils.isEmpty(mUrl)) {
             imageWorker.onDownloadComplete(null, URL_NULL);
         } else {
-            bitmap = ImageCache.getInstance().findBitmapCache(imageKey);
+            bitmap = ImageCache.getInstance().findBitmapCache(mWidth, mHeight, mUrl);
             if (bitmap == null) {
                 DiskBitmapRunnable diskBitmapRunnable = new DiskBitmapRunnable(context,
                         imageWorker, diskPath);
