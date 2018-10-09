@@ -18,7 +18,7 @@ public class ValueBitmap {
     }
 
     public Bitmap getmBitmap() {
-        return mBitmap;
+            return mBitmap;
     }
 
     public void setmBitmap(Bitmap mBitmap) {

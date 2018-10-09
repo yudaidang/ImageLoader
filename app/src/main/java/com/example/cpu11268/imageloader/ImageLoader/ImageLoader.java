@@ -184,6 +184,7 @@ public class ImageLoader implements Handler.Callback {
         } else {
             clearCallback(mCallback, mUrl);
         }
+
         imageWorker.listCallback.add(mCallback);
 
         Bitmap bitmap;

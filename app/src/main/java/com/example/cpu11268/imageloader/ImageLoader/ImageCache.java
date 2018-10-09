@@ -58,8 +58,6 @@ public class ImageCache {
     public synchronized void addBitmapToMemoryCacheTotal(ValueBitmap bitmap) {
         if (bitmap == null)
             return;
-/*        int mWidth = key.getSize();
-        int mHeight = key.getSize();*/
 
         KeyBitmap keyBitmap = new KeyBitmap(bitmap.getmSampleSize(), bitmap.getmUrl());
 

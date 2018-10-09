@@ -36,6 +36,12 @@ public class DiskCacheSimple {
         this.diskCacheDir = diskCacheDir;
     }
 
+    public synchronized void clearAll(){
+        if(diskCacheDir != null){
+            diskCacheDir.delete();
+        }
+    }
+
     public synchronized void clearDisk(int mMaxSize) {
         this.clearDisk(null, mMaxSize);
     }

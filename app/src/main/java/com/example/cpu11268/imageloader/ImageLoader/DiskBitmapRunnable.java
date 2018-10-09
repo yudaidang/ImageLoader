@@ -99,7 +99,7 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
                 Set<ImageWorker> list = listDownloading.get(data.getmUrl());
                 if (list != null) {
                     for (ImageWorker ik : list) {
-                        ik.setImageBitmap(data.getBytes(), options, msg.what);
+                        ik.decodeDataBitmap(data.getBytes(), options, msg.what);
                     }
                 }
                 listDownloading.remove(data.getmUrl());

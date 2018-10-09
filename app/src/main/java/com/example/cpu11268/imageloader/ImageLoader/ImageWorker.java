@@ -71,7 +71,7 @@ public class ImageWorker {//generic
         return bitmap;
     }
 
-    public void setImageBitmap(byte[] bytes, BitmapFactory.Options options, int resultCode) {
+    public void decodeDataBitmap(byte[] bytes, BitmapFactory.Options options, int resultCode) {
         Bitmap bitmap;
         HashMap<Integer, ImageKey> list = new HashMap<>();
         bitmap = find(list);
