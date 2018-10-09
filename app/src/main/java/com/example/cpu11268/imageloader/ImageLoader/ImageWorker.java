@@ -57,15 +57,19 @@ public class ImageWorker {//generic
 
         if (mListDecoded.containsKey(imageKey.getmUrl().hashCode())) {
             list = mListDecoded.get(imageKey.getmUrl().hashCode());
-            Map.Entry<Integer, ImageKey> entry = list.entrySet().iterator().next();
+            try {
+                Map.Entry<Integer, ImageKey> entry = list.entrySet().iterator().next();
 
-            ImageKey im = entry.getValue();
-            int sampleSize = caculateInSampleSize(im.getmOutWidth(), im.getmOutHeight(), imageKey.getSize(), imageKey.getSize());
-            if (list.containsKey(sampleSize)) {
-                bitmap = ImageCache.getInstance().findBitmapCache(imageKey.getSize(), imageKey.getSize(), imageKey.getmUrl());
-            }
-            if (bitmap == null) {
-                list.remove(sampleSize);
+                ImageKey im = entry.getValue();
+                int sampleSize = caculateInSampleSize(im.getmOutWidth(), im.getmOutHeight(), imageKey.getSize(), imageKey.getSize());
+                if (list.containsKey(sampleSize)) {
+                    bitmap = ImageCache.getInstance().findBitmapCache(imageKey.getSize(), imageKey.getSize(), imageKey.getmUrl());
+                }
+                if (bitmap == null) {
+                    list.remove(sampleSize);
+                }
+            }catch(Exception ex){
+
             }
         }
         return bitmap;

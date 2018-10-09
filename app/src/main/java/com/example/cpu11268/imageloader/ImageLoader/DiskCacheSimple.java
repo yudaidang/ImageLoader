@@ -5,15 +5,9 @@ import android.graphics.BitmapFactory;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.BitmapPolicy;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmap;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Date;
 
 public class DiskCacheSimple {
     private static DiskCacheSimple sInstance = new DiskCacheSimple();
@@ -36,48 +30,22 @@ public class DiskCacheSimple {
         this.diskCacheDir = diskCacheDir;
     }
 
-    public synchronized void clearAll(){
-        if(diskCacheDir != null){
+    public synchronized void clearAll() {
+        if (diskCacheDir != null) {
             diskCacheDir.delete();
         }
     }
 
-    public synchronized void clearDisk(int mMaxSize) {
-        this.clearDisk(null, mMaxSize);
+    public synchronized void clearDiskLastDate(Date mDate) {
+        clearDiskLastDate(diskCacheDir, mDate);
     }
 
-    public synchronized void clearDisk(File mDiskDir, int mMaxSize) {
-        if (mDiskDir == null) {
-            mDiskDir = diskCacheDir;
-        }
-
-        List allFiles = new ArrayList();
-        for (File f : mDiskDir.listFiles()) {
-            allFiles.add(f);
-        }
-
-        Collections.sort(allFiles, new Comparator<File>() {
-
-            @Override
-            public int compare(File o1, File o2) {
-                long diff = o1.lastModified() - o2.lastModified();
-                if (diff > 0) {
-                    return 1;
-                } else if (diff < 0) {
-                    return -1;
-                }
-                return 0;
-            }
-        });
-
-        while (mDiskDir.length() > mMaxSize) {
-            Iterator it = allFiles.iterator();
-            File file = (File) it.next();
-            allFiles.remove(file);
-            try {
-                FileUtils.deleteDirectory(file);
-            } catch (IOException e) {
-                e.printStackTrace();
+    public synchronized void clearDiskLastDate(File mPath, Date mDate) {
+        for (File f : mPath.listFiles()) {
+            long time = mDate.getTime();
+            long modify = f.lastModified();
+            if (modify <= time) {
+                f.delete();
             }
 
         }

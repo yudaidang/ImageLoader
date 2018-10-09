@@ -43,18 +43,16 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
     public void run() {
         Process.setThreadPriority(PRIORITY_THREAD);
 
-        if (TextUtils.isEmpty(diskCachePath)) {
-            if (DiskCacheSimple.getInstance().getDiskCacheDir() == null) {
-                diskCachePath = getDiskPath(mContext.get(), "IMAGE");
-                DiskCacheSimple.getInstance().setDiskCacheDir(new File(diskCachePath));
-            } else {
-                diskCachePath = DiskCacheSimple.getInstance().getDiskCacheDir().getAbsolutePath();
-            }
+        if (!TextUtils.isEmpty(diskCachePath)) {
+            DiskCacheSimple.getInstance().setDiskCacheDir(new File(diskCachePath));
+        } else {
+            diskCachePath = getDiskPath(mContext.get(), "IMAGE");
+            DiskCacheSimple.getInstance().setDiskCacheDir(new File(diskCachePath));
         }
 
         ValueBitmap bitmap;
 
-        if (ImageCache.getInstance().isBitmapFromDiskCache(imageWorker.imageKey.getmUrl())) {
+        if (ImageCache.getInstance().isBitmapFromDiskCache(diskCachePath + File.separator + imageWorker.imageKey.getmUrl().hashCode())) {
             if (imageWorker.imageKey.getSize() == ImageWorker.DEFAULT_MAX_SIZE) {
                 bitmap = ImageCache.getInstance().getBitmapFromDiskCache(diskCachePath + File.separator + imageWorker.imageKey.getmUrl().hashCode(), imageWorker.imageKey.getmUrl());
             } else {

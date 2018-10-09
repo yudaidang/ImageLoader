@@ -182,7 +182,7 @@ public class ImageLoader implements Handler.Callback {
             imageWorker = new ImageWorker(imageKey);
             listImageWorker.put(mCallback.hashCode(), imageWorker);
         } else {
-            clearCallback(mCallback, mUrl);
+            clearCallback(mCallback);
         }
 
         imageWorker.listCallback.add(mCallback);
@@ -218,6 +218,7 @@ public class ImageLoader implements Handler.Callback {
             ImageWorker imageWorker = listImageWorker.get(callback);
             if (imageWorker != null && (imageWorker.imageKey.getmUrl() != mUrl) && imageWorker.listCallback.contains(callback)) {
                 listImageWorker.remove(callback);
+                imageWorker.listCallback.remove(callback);
             }
         }
     }
@@ -227,6 +228,7 @@ public class ImageLoader implements Handler.Callback {
             ImageWorker imageWorker = listImageWorker.get(callback);
             if (imageWorker != null && imageWorker.listCallback.contains(callback)) {
                 listImageWorker.remove(callback);
+                imageWorker.listCallback.remove(callback);
             }
         }
     }

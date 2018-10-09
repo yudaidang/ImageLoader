@@ -1,24 +1,22 @@
 package com.example.cpu11268.imageloader.RecyclerView.Holder;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.cpu11268.imageloader.ImageLoader.DiskCacheSimple;
 import com.example.cpu11268.imageloader.ImageLoader.ImageLoader;
-import com.example.cpu11268.imageloader.ImageLoader.ImageWorker;
 import com.example.cpu11268.imageloader.R;
 import com.example.cpu11268.imageloader.RecyclerView.view_item.NewFeedItem;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
-import java.util.Set;
 
 public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     private static int temp = 0;
@@ -78,6 +76,7 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
             ImageLoader.getInstance().loadImageWorker(mContext, item.getmNewFeed().getmUrlImage(), mAvatar, cachePath + File.separator + "YUDAIDANG");
             mName.setText(item.getmNewFeed().getmName());
 
+
         }
     }
 
@@ -86,6 +85,14 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
     public void onRecycled() {
         super.onRecycled();
         ImageLoader.getInstance().clearView(mAvatar);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            Date d = sdf.parse("10/10/2018");
+            DiskCacheSimple.getInstance().clearDiskLastDate(d);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
