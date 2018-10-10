@@ -53,7 +53,7 @@ public class DiskCacheSimple {
 
     public boolean isExistFile(String mPath) {
         File f = new File(mPath);
-        return f.exists() && f.length() != 0 ? true : false;
+        return f.exists() && f.length() != 0;
     }
 
     public synchronized ValueBitmap get(String mPath, String mUrl) {

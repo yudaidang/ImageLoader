@@ -77,13 +77,7 @@ public class ImageCache {
         return inSampleSize;
     }
 
-    public Bitmap findBitmapCache(int inWidth, int inHeight, String mUrl) {
-        int mSampleSize;
-        if (list.containsKey(mUrl)) {
-            mSampleSize = caculateInSampleSize(list.get(mUrl).getmWidth(), list.get(mUrl).getmHeight(), inWidth, inHeight);
-        } else {
-            return null;
-        }
+    public Bitmap findBitmapCache(int mSampleSize, String mUrl){
         KeyBitmap key = new KeyBitmap(mSampleSize, mUrl);
         if (isBitmapFromMemoryCache(key)) {
             return getBitmapFromCache(mMemoryCache, key);
@@ -92,6 +86,16 @@ public class ImageCache {
         } else {
             return null;
         }
+    }
+
+    public Bitmap findBitmapCache(int inWidth, int inHeight, String mUrl) {
+        int mSampleSize;
+        if (list.containsKey(mUrl)) {
+            mSampleSize = caculateInSampleSize(list.get(mUrl).getmWidth(), list.get(mUrl).getmHeight(), inWidth, inHeight);
+        } else {
+            return null;
+        }
+        return findBitmapCache(mSampleSize, mUrl);
     }
 
     private Bitmap getBitmapFromCache(LruCache<KeyBitmap, Bitmap> cache, KeyBitmap key) {

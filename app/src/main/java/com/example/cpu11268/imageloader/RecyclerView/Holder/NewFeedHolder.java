@@ -88,7 +88,7 @@ public class NewFeedHolder extends BaseViewHolder<NewFeedItem> {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         try {
             Date d = sdf.parse("10/10/2018");
-            DiskCacheSimple.getInstance().clearDiskLastDate(d);
+//            DiskCacheSimple.getInstance().clearDiskLastDate(d);
 
         } catch (ParseException e) {
             e.printStackTrace();

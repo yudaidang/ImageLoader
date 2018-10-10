@@ -2,21 +2,18 @@ package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Pair;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmap;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 public class ImageWorker {//generic
     public static final int DEFAULT_MAX_SIZE = 0;
-    public HashSet<MyDownloadCallback> listCallback = new HashSet<>();
+    public HashSet<MyDownloadCallback> listCallback = new HashSet<>(); //arrayset
     public ImageKey imageKey;
-    //Integer1: mUrl
-    //Integer2: Sample Size
-    //List nhung nhung sample size da duoc download voi cung 1 url
-    protected HashMap<Integer, HashMap<Integer, ImageKey>> mListDecoded = new HashMap<>();
+    protected HashMap<String, Pair<Integer, Integer>> mListDecoded = new HashMap<>();
 
     public ImageWorker(ImageKey imageKey) {
         this.imageKey = imageKey;
@@ -31,11 +28,11 @@ public class ImageWorker {//generic
                     ex.printStackTrace();
                 }
             }
+            listCallback.clear();
         }
-        listCallback.clear();
     }
 
-    private Bitmap decode(byte[] bytes, BitmapFactory.Options options, HashMap<Integer, ImageKey> list) {
+    private Bitmap decode(byte[] bytes, BitmapFactory.Options options) {
         Bitmap bitmap;
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
@@ -47,42 +44,29 @@ public class ImageWorker {//generic
         bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
         imageKey.setmOutHeight(height);
         imageKey.setmOutWidth(width);
-        list.put(sampleSize, imageKey);
         ImageCache.getInstance().addBitmapToMemoryCacheTotal(new ValueBitmap(bitmap, sampleSize, imageKey.getmUrl(), width, height)); //?
+        mListDecoded.put(imageKey.getmUrl(), new Pair<>(width, height));
         return bitmap;
     }
 
-    private Bitmap find(HashMap<Integer, ImageKey> list) {
+    private Bitmap find() {
         Bitmap bitmap = null;
-
-        if (mListDecoded.containsKey(imageKey.getmUrl().hashCode())) {
-            list = mListDecoded.get(imageKey.getmUrl().hashCode());
-            try {
-                Map.Entry<Integer, ImageKey> entry = list.entrySet().iterator().next();
-
-                ImageKey im = entry.getValue();
-                int sampleSize = caculateInSampleSize(im.getmOutWidth(), im.getmOutHeight(), imageKey.getSize(), imageKey.getSize());
-                if (list.containsKey(sampleSize)) {
-                    bitmap = ImageCache.getInstance().findBitmapCache(imageKey.getSize(), imageKey.getSize(), imageKey.getmUrl());
-                }
-                if (bitmap == null) {
-                    list.remove(sampleSize);
-                }
-            }catch(Exception ex){
-
-            }
+        Pair<Integer, Integer> mWH;
+        if (mListDecoded.containsKey(imageKey.getmUrl())) {
+            mWH = mListDecoded.get(imageKey.getmUrl());
+            int sampleSize = caculateInSampleSize(mWH.first, mWH.second, imageKey.getSize(), imageKey.getSize());
+            bitmap = ImageCache.getInstance().findBitmapCache(sampleSize, imageKey.getmUrl());
         }
         return bitmap;
     }
 
     public void decodeDataBitmap(byte[] bytes, BitmapFactory.Options options, int resultCode) {
         Bitmap bitmap;
-        HashMap<Integer, ImageKey> list = new HashMap<>();
-        bitmap = find(list);
+        bitmap = find();
         if (bitmap == null) {
-            bitmap = decode(bytes, options, list);
+            mListDecoded.remove(imageKey.getmUrl());
+            bitmap = decode(bytes, options);
         }
-        mListDecoded.put(imageKey.getmUrl().hashCode(), list);
         onDownloadComplete(bitmap, resultCode);
     }
 

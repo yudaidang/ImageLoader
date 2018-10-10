@@ -39,7 +39,7 @@ public class ImageLoader implements Handler.Callback {
     protected int mHeight = DEFAULT_MAX_SIZE;
     private Executor executor;
     private WeakReference<View> view;
-    private HashMap<Integer, ImageWorker> listImageWorker = new HashMap<>();
+    private HashMap<ImageWorker.MyDownloadCallback, ImageWorker> listImageWorker = new HashMap<>();
     //Integer view.hashcode();
 
     private HashMap<Integer, Runnable> listTaskQueue = new HashMap<>();
@@ -180,7 +180,7 @@ public class ImageLoader implements Handler.Callback {
 
         if (imageWorker == null) {
             imageWorker = new ImageWorker(imageKey);
-            listImageWorker.put(mCallback.hashCode(), imageWorker);
+            listImageWorker.put(mCallback, imageWorker);
         } else {
             clearCallback(mCallback);
         }
@@ -253,8 +253,8 @@ public class ImageLoader implements Handler.Callback {
     }
 
     private void removeCallback(ImageWorker im) {
-        for (Iterator<Map.Entry<Integer, ImageWorker>> it = listImageWorker.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<Integer, ImageWorker> entry = it.next();
+        for (Iterator<Map.Entry<ImageWorker.MyDownloadCallback, ImageWorker>> it = listImageWorker.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<ImageWorker.MyDownloadCallback, ImageWorker> entry = it.next();
             if (entry.getValue().equals(im)) {
                 it.remove();
             }
