@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.DataDownload;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.MessageBitmap;
@@ -28,6 +29,7 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
     private final int PRIORITY_THREAD = 1;
     //    private ImageKey imageKey;
     private ImageWorker imageWorker;
+    //List url downloading
     private HashMap<String, HashSet<ImageWorker>> listDownloading = new HashMap<>();
     private String diskCachePath;
 
@@ -58,7 +60,8 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
             } else {
                 bitmap = ImageCache.getInstance().getBitmapFromDiskCache(diskCachePath + File.separator + imageWorker.imageKey.getmUrl().hashCode(), imageWorker.imageKey.getSize(), imageWorker.imageKey.getSize(), options, imageWorker.imageKey.getmUrl());
             }
-            ImageCache.getInstance().addBitmapToMemoryCacheTotal(bitmap); //?
+            ImageCache.getInstance().addBitmapToMemoryCache(bitmap); //?
+            Log.d("IMAGELOADERLOG", "LOAD BITMAP WITH DISK");
 
             handleResult(imageWorker.imageKey, bitmap.getmBitmap(), ImageLoader.LOAD_DISK);
         } else {

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -39,7 +40,8 @@ public class ImageLoader implements Handler.Callback {
     protected int mHeight = DEFAULT_MAX_SIZE;
     private Executor executor;
     private WeakReference<View> view;
-    private HashMap<ImageWorker.MyDownloadCallback, ImageWorker> listImageWorker = new HashMap<>();
+    // 1 imageworker co nhieu callback.
+    private HashMap<ImageWorker.MyDownloadCallback, ImageWorker> mCallbacksImageWorker = new HashMap<>();
     //Integer view.hashcode();
 
     private HashMap<Integer, Runnable> listTaskQueue = new HashMap<>();
@@ -180,7 +182,7 @@ public class ImageLoader implements Handler.Callback {
 
         if (imageWorker == null) {
             imageWorker = new ImageWorker(imageKey);
-            listImageWorker.put(mCallback, imageWorker);
+            mCallbacksImageWorker.put(mCallback, imageWorker);
         } else {
             clearCallback(mCallback);
         }
@@ -201,6 +203,8 @@ public class ImageLoader implements Handler.Callback {
                 }
                 executor.execute(diskBitmapRunnable);
             } else {
+                Log.d("IMAGELOADERLOG", "LOAD BITMAP WITH MEMORY");
+
                 imageWorker.onDownloadComplete(bitmap, LOAD_MEM);
             }
         }
@@ -215,9 +219,9 @@ public class ImageLoader implements Handler.Callback {
 
     public void clearCallback(ImageWorker.MyDownloadCallback callback, String mUrl) {
         if (callback != null) {
-            ImageWorker imageWorker = listImageWorker.get(callback);
+            ImageWorker imageWorker = mCallbacksImageWorker.get(callback);
             if (imageWorker != null && (imageWorker.imageKey.getmUrl() != mUrl) && imageWorker.listCallback.contains(callback)) {
-                listImageWorker.remove(callback);
+                mCallbacksImageWorker.remove(callback);
                 imageWorker.listCallback.remove(callback);
             }
         }
@@ -225,9 +229,9 @@ public class ImageLoader implements Handler.Callback {
 
     public void clearCallback(ImageWorker.MyDownloadCallback callback) {
         if (callback != null) {
-            ImageWorker imageWorker = listImageWorker.get(callback);
+            ImageWorker imageWorker = mCallbacksImageWorker.get(callback);
             if (imageWorker != null && imageWorker.listCallback.contains(callback)) {
-                listImageWorker.remove(callback);
+                mCallbacksImageWorker.remove(callback);
                 imageWorker.listCallback.remove(callback);
             }
         }
@@ -253,7 +257,7 @@ public class ImageLoader implements Handler.Callback {
     }
 
     private void removeCallback(ImageWorker im) {
-        for (Iterator<Map.Entry<ImageWorker.MyDownloadCallback, ImageWorker>> it = listImageWorker.entrySet().iterator(); it.hasNext(); ) {
+        for (Iterator<Map.Entry<ImageWorker.MyDownloadCallback, ImageWorker>> it = mCallbacksImageWorker.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<ImageWorker.MyDownloadCallback, ImageWorker> entry = it.next();
             if (entry.getValue().equals(im)) {
                 it.remove();
@@ -262,7 +266,7 @@ public class ImageLoader implements Handler.Callback {
     }
 
     private ImageWorker getImageWorker(ImageKey imageKey) {
-        for (ImageWorker ik : listImageWorker.values()) {
+        for (ImageWorker ik : mCallbacksImageWorker.values()) {
             if (ik.imageKey.equals(imageKey)) {
                 return ik;
             }

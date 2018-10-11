@@ -26,7 +26,7 @@ public class ImageCache {
         mMemoryCache = new LruCache<KeyBitmap, Bitmap>(cacheSize) {
             @Override
             protected int sizeOf(KeyBitmap key, Bitmap value) {
-                return value.getByteCount() / 1024;
+                return value.getByteCount();
 
             }
         };
@@ -34,7 +34,7 @@ public class ImageCache {
         mMemoryCacheLarge = new LruCache<KeyBitmap, Bitmap>(cacheSize) {
             @Override
             protected int sizeOf(KeyBitmap key, Bitmap value) {
-                return value.getByteCount() / 1024;
+                return value.getByteCount();
             }
         };
 
@@ -55,7 +55,7 @@ public class ImageCache {
     //*
 
     //MemoryCacheTotal
-    public synchronized void addBitmapToMemoryCacheTotal(ValueBitmap bitmap) {
+    public synchronized void addBitmapToMemoryCache(ValueBitmap bitmap) {
         if (bitmap == null)
             return;
 
@@ -64,7 +64,7 @@ public class ImageCache {
         if (bitmap.getmBitmap().getByteCount() > DEFAULT_MAX_SIZE) {
             addBitmapToMemoryLargeCache(keyBitmap, bitmap.getmBitmap());
         } else {
-            addBitmapToMemoryCache(keyBitmap, bitmap.getmBitmap());
+            addBitmapToMemorySmallCache(keyBitmap, bitmap.getmBitmap());
         }
         list.put(bitmap.getmUrl(), new WidthHeight(bitmap.getmOutWidth(), bitmap.getmOutHeight()));
     }
@@ -79,7 +79,7 @@ public class ImageCache {
 
     public Bitmap findBitmapCache(int mSampleSize, String mUrl){
         KeyBitmap key = new KeyBitmap(mSampleSize, mUrl);
-        if (isBitmapFromMemoryCache(key)) {
+        if (isBitmapFromMemorySmallCache(key)) {
             return getBitmapFromCache(mMemoryCache, key);
         } else if (isBitmapFromMemoryLargeCache(key)) {
             return getBitmapFromCache(mMemoryCacheLarge, key);
@@ -105,13 +105,13 @@ public class ImageCache {
         return null;
     }
 
-    private void addBitmapToMemoryCache(KeyBitmap key, Bitmap bitmap) { //?
-        if (!isBitmapFromMemoryCache(key) && bitmap != null) {
+    private void addBitmapToMemorySmallCache(KeyBitmap key, Bitmap bitmap) { //?
+        if (!isBitmapFromMemorySmallCache(key) && bitmap != null) {
             mMemoryCache.put(key, bitmap);
         }
     }
 
-    private boolean isBitmapFromMemoryCache(KeyBitmap key) { //?
+    private boolean isBitmapFromMemorySmallCache(KeyBitmap key) { //?
         return mMemoryCache.snapshot().containsKey(key);
     }
 

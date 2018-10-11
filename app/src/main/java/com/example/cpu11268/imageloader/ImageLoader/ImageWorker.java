@@ -2,6 +2,7 @@ package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.util.Pair;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmap;
@@ -44,7 +45,7 @@ public class ImageWorker {//generic
         bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
         imageKey.setmOutHeight(height);
         imageKey.setmOutWidth(width);
-        ImageCache.getInstance().addBitmapToMemoryCacheTotal(new ValueBitmap(bitmap, sampleSize, imageKey.getmUrl(), width, height)); //?
+        ImageCache.getInstance().addBitmapToMemoryCache(new ValueBitmap(bitmap, sampleSize, imageKey.getmUrl(), width, height)); //?
         mListDecoded.put(imageKey.getmUrl(), new Pair<>(width, height));
         return bitmap;
     }
@@ -66,6 +67,9 @@ public class ImageWorker {//generic
         if (bitmap == null) {
             mListDecoded.remove(imageKey.getmUrl());
             bitmap = decode(bytes, options);
+        } else {
+            Log.d("IMAGELOADERLOG", "LOAD BITMAP WITH MEMORY");
+
         }
         onDownloadComplete(bitmap, resultCode);
     }

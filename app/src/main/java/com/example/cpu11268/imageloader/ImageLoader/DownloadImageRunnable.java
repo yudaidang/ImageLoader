@@ -3,6 +3,7 @@ package com.example.cpu11268.imageloader.ImageLoader;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
+import android.util.Log;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.AddImageRunnable;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.DataDownload;
@@ -57,6 +58,8 @@ public class DownloadImageRunnable implements Runnable {
                 String newUrl = connection.getHeaderField("Location");
                 connection = (HttpURLConnection) new URL(newUrl).openConnection();
             }
+
+            Log.d("IMAGELOADERLOG", "LOAD BITMAP WITH INTERNET");
             inputStream = connection.getInputStream();
 
             bytes = IOUtils.toByteArray(inputStream);
