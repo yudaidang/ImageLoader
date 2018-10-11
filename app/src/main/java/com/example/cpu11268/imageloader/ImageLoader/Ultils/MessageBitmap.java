@@ -7,21 +7,19 @@ import com.example.cpu11268.imageloader.ImageLoader.ImageKey;
 public class MessageBitmap {
     private Bitmap mBitmap;
     private ImageKey imageKey;
-    private boolean mMaxSize;
     private String id;
 
-    public MessageBitmap(ImageKey imageKey, Bitmap mBitmap, boolean mMaxSize) {
-        this.mMaxSize = mMaxSize;
+    public MessageBitmap(ImageKey imageKey, Bitmap mBitmap) {
         this.mBitmap = mBitmap;
         this.imageKey = imageKey;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Bitmap getmBitmap() {
@@ -29,10 +27,6 @@ public class MessageBitmap {
     }
 
     public ImageKey getImageKey() {
-         return imageKey;
-    }
-
-    public boolean ismMaxSize() {
-        return mMaxSize;
+        return imageKey;
     }
 }

@@ -13,15 +13,7 @@ public class DataDownload {
         return mUrl;
     }
 
-    public void setmUrl(String mUrl) {
-        this.mUrl = mUrl;
-    }
-
     public byte[] getBytes() {
         return bytes;
-    }
-
-    public void setBytes(byte[] bytes) {
-        this.bytes = bytes;
     }
 }

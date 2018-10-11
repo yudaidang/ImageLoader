@@ -13,16 +13,8 @@ public class KeyBitmap {
         return mSampleSize;
     }
 
-    public void setmSampleSize(int mSampleSize) {
-        this.mSampleSize = mSampleSize;
-    }
-
     public String getmUrl() {
         return mUrl;
-    }
-
-    public void setmUrl(String mUrl) {
-        this.mUrl = mUrl;
     }
 
     @Override

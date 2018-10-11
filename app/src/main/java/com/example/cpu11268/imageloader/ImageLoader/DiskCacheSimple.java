@@ -22,10 +22,6 @@ public class DiskCacheSimple {
         return sInstance;
     }
 
-    public File getDiskCacheDir() {
-        return diskCacheDir;
-    }
-
     public void setDiskCacheDir(File diskCacheDir) {
         this.diskCacheDir = diskCacheDir;
     }

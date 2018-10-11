@@ -70,7 +70,7 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
                 if (!listDownloading.containsKey(imageWorker.imageKey.getmUrl())) {
                     list = new HashSet<>();
                     DownloadImageRunnable downloadImageRunnable = new DownloadImageRunnable(imageWorker.imageKey.getmUrl(), mHandlerDownload, diskCachePath);
-                    ImageLoader.getInstance().executorInternet.execute(downloadImageRunnable);
+                    ImageLoader.executorInternet.execute(downloadImageRunnable);
 
                 } else {
                     list = listDownloading.get(imageWorker.imageKey.getmUrl());
@@ -79,13 +79,13 @@ public class DiskBitmapRunnable implements Runnable, Handler.Callback {
                 listDownloading.put(imageWorker.imageKey.getmUrl(), list);
 
             } else {
-                handleResult(imageWorker.imageKey, null, ImageLoader.INTENER_NOT_CONNECT);
+                handleResult(imageWorker.imageKey, null, ImageLoader.INTERNET_NOT_CONNECT);
             }
         }
     }
 
     private void handleResult(ImageKey imageKey, Bitmap bitmap, int resultCode) {
-        MessageBitmap messageBitmap = new MessageBitmap(imageKey, bitmap, false);
+        MessageBitmap messageBitmap = new MessageBitmap(imageKey, bitmap);
         Message message = ImageLoader.getInstance().mHandler.obtainMessage(resultCode, messageBitmap);
         message.sendToTarget();
     }

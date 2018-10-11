@@ -14,6 +14,7 @@ public class ImageWorker {//generic
     public static final int DEFAULT_MAX_SIZE = 0;
     public HashSet<MyDownloadCallback> listCallback = new HashSet<>(); //arrayset
     public ImageKey imageKey;
+    //1 url thì có 1 outwidth và 1 outheight
     protected HashMap<String, Pair<Integer, Integer>> mListDecoded = new HashMap<>();
 
     public ImageWorker(ImageKey imageKey) {
@@ -43,8 +44,6 @@ public class ImageWorker {//generic
         int height = options.outHeight;
         options.inJustDecodeBounds = false;
         bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
-        imageKey.setmOutHeight(height);
-        imageKey.setmOutWidth(width);
         ImageCache.getInstance().addBitmapToMemoryCache(new ValueBitmap(bitmap, sampleSize, imageKey.getmUrl(), width, height)); //?
         mListDecoded.put(imageKey.getmUrl(), new Pair<>(width, height));
         return bitmap;

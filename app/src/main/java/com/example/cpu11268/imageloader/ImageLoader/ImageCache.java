@@ -2,11 +2,11 @@ package com.example.cpu11268.imageloader.ImageLoader;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v4.util.Pair;
 import android.util.LruCache;
 
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.KeyBitmap;
 import com.example.cpu11268.imageloader.ImageLoader.Ultils.ValueBitmap;
-import com.example.cpu11268.imageloader.ImageLoader.Ultils.WidthHeight;
 
 import java.io.File;
 import java.util.HashMap;
@@ -19,7 +19,7 @@ public class ImageCache {
     private int maxMemory = (int) Runtime.getRuntime().maxMemory();
     private int cacheSize = maxMemory / 8;
 
-    private HashMap<String, WidthHeight> list = new HashMap<>();
+    private HashMap<String, Pair<Integer, Integer>> list = new HashMap<>();
 
     private ImageCache() {
 
@@ -66,7 +66,7 @@ public class ImageCache {
         } else {
             addBitmapToMemorySmallCache(keyBitmap, bitmap.getmBitmap());
         }
-        list.put(bitmap.getmUrl(), new WidthHeight(bitmap.getmOutWidth(), bitmap.getmOutHeight()));
+        list.put(bitmap.getmUrl(), new Pair<>(bitmap.getmOutWidth(), bitmap.getmOutHeight()));
     }
 
     private int caculateInSampleSize(int outWidth, int outHeight, int widthReq, int heightReq) {
@@ -77,7 +77,7 @@ public class ImageCache {
         return inSampleSize;
     }
 
-    public Bitmap findBitmapCache(int mSampleSize, String mUrl){
+    public Bitmap findBitmapCache(int mSampleSize, String mUrl) {
         KeyBitmap key = new KeyBitmap(mSampleSize, mUrl);
         if (isBitmapFromMemorySmallCache(key)) {
             return getBitmapFromCache(mMemoryCache, key);
@@ -91,7 +91,7 @@ public class ImageCache {
     public Bitmap findBitmapCache(int inWidth, int inHeight, String mUrl) {
         int mSampleSize;
         if (list.containsKey(mUrl)) {
-            mSampleSize = caculateInSampleSize(list.get(mUrl).getmWidth(), list.get(mUrl).getmHeight(), inWidth, inHeight);
+            mSampleSize = caculateInSampleSize(list.get(mUrl).first, list.get(mUrl).second, inWidth, inHeight);
         } else {
             return null;
         }

@@ -27,17 +27,17 @@ import java.util.concurrent.TimeUnit;
  * Created by hungnq3 on 05/09/18.
  */
 public class ImageLoader implements Handler.Callback {
-    public static final int DEFAULT_MAX_SIZE = 0;
     public static final int LOAD_INTERNET = 101;
     public static final int LOAD_DISK = 102;
-    public static final int LOAD_MEM = 103;
-    public static final int URL_NULL = 104;
-    public static final int INTENER_NOT_CONNECT = 105;
+    public static final int INTERNET_NOT_CONNECT = 105;
+    private static final int DEFAULT_MAX_SIZE = 0;
+    private static final int LOAD_MEM = 103;
+    private static final int URL_NULL = 104;
     protected static Executor executorInternet;
     private static ImageLoader sInstance = new ImageLoader();
     protected final Handler mHandler;
-    protected int mWidth = DEFAULT_MAX_SIZE;
-    protected int mHeight = DEFAULT_MAX_SIZE;
+    private int mWidth = DEFAULT_MAX_SIZE;
+    private int mHeight = DEFAULT_MAX_SIZE;
     private Executor executor;
     private WeakReference<View> view;
     // 1 imageworker co nhieu callback.
@@ -45,13 +45,13 @@ public class ImageLoader implements Handler.Callback {
     //Integer view.hashcode();
 
     private HashMap<Integer, Runnable> listTaskQueue = new HashMap<>();
-    private BlockingQueue queueDisk, queueDownload;
+    private BlockingQueue queueDownload;
 
     public ImageLoader() {
 
         mHandler = new Handler(this);
         if (executor == null) {
-            queueDisk = new LinkedBlockingDeque() {
+            BlockingQueue queueDisk = new LinkedBlockingDeque() {
 
                 @Override
                 public boolean add(Object o) {
@@ -244,7 +244,7 @@ public class ImageLoader implements Handler.Callback {
 
     @Override
     public boolean handleMessage(Message msg) {
-        if (msg.what == ImageLoader.LOAD_DISK || msg.what == ImageLoader.INTENER_NOT_CONNECT) {
+        if (msg.what == ImageLoader.LOAD_DISK || msg.what == ImageLoader.INTERNET_NOT_CONNECT) {
             MessageBitmap messageBitmap = (MessageBitmap) msg.obj;
 
             ImageWorker imageWorker = getImageWorker(messageBitmap.getImageKey());

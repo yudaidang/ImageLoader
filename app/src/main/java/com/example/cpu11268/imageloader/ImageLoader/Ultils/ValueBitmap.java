@@ -18,42 +18,23 @@ public class ValueBitmap {
     }
 
     public Bitmap getmBitmap() {
-            return mBitmap;
-    }
-
-    public void setmBitmap(Bitmap mBitmap) {
-        this.mBitmap = mBitmap;
+        return mBitmap;
     }
 
     public int getmSampleSize() {
         return mSampleSize;
     }
 
-    public void setmSampleSize(int mSampleSize) {
-        this.mSampleSize = mSampleSize;
-    }
-
     public String getmUrl() {
         return mUrl;
-    }
-
-    public void setmUrl(String mUrl) {
-        this.mUrl = mUrl;
     }
 
     public int getmOutWidth() {
         return mOutWidth;
     }
 
-    public void setmOutWidth(int mOutWidth) {
-        this.mOutWidth = mOutWidth;
-    }
-
     public int getmOutHeight() {
         return mOutHeight;
     }
 
-    public void setmOutHeight(int mOutHeight) {
-        this.mOutHeight = mOutHeight;
-    }
 }
